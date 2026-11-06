@@ -1,11 +1,12 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
-import { Bench, LAYOUT, type Palette } from "./Bench";
-import { Phone, PHONE } from "./Phone";
+import type { DeviceKind } from "@/content/tour";
+import { Bench, type Palette } from "./Bench";
+import { Device, SPECS, focusOf } from "./Device";
 import { smoothstep, tour } from "./state";
 
 /** Read the theme's paper and ink from the CSS tokens, follow light/dark. */
@@ -34,44 +35,48 @@ type Pose = {
   /** Area that must stay in frame at the target, in scene units. */
   fit: [number, number];
   /** Lens shift, as a fraction of the viewport: positive moves the picture right / down. */
-  shift: [number, number];
+  shift: THREE.Vector2;
 };
 
-const phoneRaised = new THREE.Vector3(LAYOUT.phone[0], PHONE.depth / 2 + 1.05, LAYOUT.phone[1] + 0.15);
-
-function poses(portrait: boolean): Record<"overview" | "phone" | "outro", Pose> {
-  return {
-    // The whole bench from above, pushed right (desktop) or down (phone) to leave
-    // calm paper for the title
-    overview: {
-      target: new THREE.Vector3(1.15, 0, -0.35),
-      dir: new THREE.Vector3(-0.08, 0.82, 0.57).normalize(),
-      fit: portrait ? [6.4, 5] : [11, 6.2],
-      shift: portrait ? [0, 0.18] : [0.22, 0.05],
+/** The whole bench, then each stop in walking order, then the whole bench again. */
+function poses(portrait: boolean, kinds: DeviceKind[]): Pose[] {
+  const pick = (f: { portrait: [number, number]; wide: [number, number] }) => (portrait ? f.portrait : f.wide);
+  return [
+    // From above, pushed right (desktop) or down (phone) to leave calm paper for the title
+    {
+      // (lower on a phone, so the column is shorter than the space under the name)
+      target: new THREE.Vector3(0.3, 0, -0.55),
+      dir: new THREE.Vector3(...(portrait ? [-0.1, 0.55, 0.83] : [0.3, 0.8, 0.52])).normalize(),
+      fit: portrait ? [4.4, 6.8] : [13, 8.2],
+      shift: new THREE.Vector2(...(portrait ? [0, 0.24] : [0.22, 0])),
     },
-    // Face to face with the raised phone, pushed right (desktop) or up (phone)
-    phone: {
-      target: phoneRaised,
-      dir: new THREE.Vector3(0.05, 0.16, 1).normalize(),
-      fit: portrait ? [1.5, 1.66 * 2.5] : [1.4, 1.66 * 1.4],
-      shift: portrait ? [0, -0.17] : [0.2, 0],
+    // Face to face with each device, pushed right (desktop) or up (phone) beside its text
+    ...kinds.map((k) => {
+      const { view } = SPECS[k];
+      return {
+        target: focusOf(k),
+        dir: new THREE.Vector3(...view.dir).normalize(),
+        fit: pick(view.fit),
+        shift: new THREE.Vector2(...pick(view.shift)),
+      };
+    }),
+    // Pull back and look down the whole bench
+    {
+      target: new THREE.Vector3(0.3, 0, -0.6),
+      dir: new THREE.Vector3(0.4, 0.66, 0.62).normalize(),
+      fit: portrait ? [4.4, 7.4] : [11, 6.8],
+      shift: new THREE.Vector2(...(portrait ? [0, 0.26] : [0.24, 0.04])),
     },
-    // Pull back and look along the bench at what comes next
-    outro: {
-      target: new THREE.Vector3(1.75, 0, -0.45),
-      dir: new THREE.Vector3(-0.35, 0.7, 0.62).normalize(),
-      fit: portrait ? [6, 5] : [8.2, 4.8],
-      shift: portrait ? [0, 0.26] : [0.24, 0.04],
-    },
-  };
+  ];
 }
 
-function CameraRig() {
+function CameraRig({ kinds }: { kinds: DeviceKind[] }) {
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
   const scene = useThree((s) => s.scene);
   const size = useThree((s) => s.size);
-  const portrait = size.width / size.height < 0.9;
-  const p = useMemo(() => poses(portrait), [portrait]);
+  // Same test as the `wide` CSS variant, so text and framing always agree
+  const portrait = !(size.width >= 768 && size.width / size.height >= 0.9);
+  const p = useMemo(() => poses(portrait, kinds), [portrait, kinds]);
 
   // A narrow screen needs a wider lens, or the camera backs off too far
   useEffect(() => {
@@ -92,20 +97,20 @@ function CameraRig() {
     const distFor = (fit: [number, number]) =>
       Math.max(fit[1] / 2 / Math.tan(vfov / 2), fit[0] / 2 / Math.tan(hfov / 2));
 
-    const a = smoothstep(0, 1, tour.dive);
-    const b = smoothstep(0, 1, tour.outro);
+    // Walk from pose to pose: each leg only moves once the previous one is done
     const { target, dir, shift } = scratch;
-    target.lerpVectors(p.overview.target, p.phone.target, a).lerp(p.outro.target, b);
-    dir.lerpVectors(p.overview.dir, p.phone.dir, a).lerp(p.outro.dir, b).normalize();
-    const dist = THREE.MathUtils.lerp(
-      THREE.MathUtils.lerp(distFor(p.overview.fit), distFor(p.phone.fit), a),
-      distFor(p.outro.fit),
-      b,
-    );
-    shift.set(
-      THREE.MathUtils.lerp(THREE.MathUtils.lerp(p.overview.shift[0], p.phone.shift[0], a), p.outro.shift[0], b),
-      THREE.MathUtils.lerp(THREE.MathUtils.lerp(p.overview.shift[1], p.phone.shift[1], a), p.outro.shift[1], b),
-    );
+    target.copy(p[0].target);
+    dir.copy(p[0].dir);
+    shift.copy(p[0].shift);
+    let dist = distFor(p[0].fit);
+    for (let k = 1; k < p.length; k++) {
+      const t = smoothstep(0, 1, tour.travel[k - 1]);
+      target.lerp(p[k].target, t);
+      dir.lerp(p[k].dir, t);
+      shift.lerp(p[k].shift, t);
+      dist += (distFor(p[k].fit) - dist) * t;
+    }
+    dir.normalize();
 
     // Critically damped follow: scroll already eases, this only removes steps
     const k = now.ready ? 1 - Math.exp(-10 * Math.min(delta, 0.1)) : 1;
@@ -134,7 +139,7 @@ function CameraRig() {
 
 /* ---------- Light: soft daylight from the upper left, a warm room for reflections ---------- */
 
-function Daylight({ palette }: { palette: Palette }) {
+function Daylight({ palette, shadowMap }: { palette: Palette; shadowMap: number }) {
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
   const dark = useMemo(() => new THREE.Color(palette.paper).getHSL({ h: 0, s: 0, l: 0 }).l < 0.3, [palette.paper]);
@@ -164,7 +169,7 @@ function Daylight({ palette }: { palette: Palette }) {
         intensity={dark ? 1.1 : 2.1}
         color={dark ? "#ffd9b8" : "#fff3e2"}
         castShadow
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[shadowMap, shadowMap]}
         shadow-bias={-0.0004}
         shadow-normalBias={0.02}
         shadow-radius={6}
@@ -193,26 +198,38 @@ function Bridge() {
   return null;
 }
 
-export default function Scene({ screens, onReady }: { screens: string[]; onReady: () => void }) {
+export default function Scene({
+  stops,
+  onReady,
+}: {
+  stops: { device: DeviceKind; screens: string[] }[];
+  onReady: () => void;
+}) {
   const palette = usePalette();
+  const kinds = useMemo(() => stops.map((s) => s.device), [stops]);
+  // A phone's GPU gets fewer pixels and a smaller shadow map
+  const coarse = useMemo(() => matchMedia("(pointer: coarse)").matches, []);
+  // Screens arrive device by device, in walking order
+  const [loaded, setLoaded] = useState(0);
+  const next = useCallback(() => setLoaded((n) => n + 1), []);
   return (
     <Canvas
       frameloop="demand"
       shadows="percentage"
-      dpr={[1, 1.75]}
+      dpr={[1, coarse ? 1.5 : 1.75]}
       camera={{ fov: 32, near: 0.1, far: 120, position: [0, 6, 6] }}
       gl={{ antialias: true, toneMapping: THREE.NeutralToneMapping, powerPreference: "high-performance" }}
-      // Vertical swipes scroll the page; horizontal ones can turn the phone
+      // Vertical swipes scroll the page; horizontal ones can turn a device
       style={{ touchAction: "pan-y" }}
       onCreated={() => requestAnimationFrame(onReady)}
     >
       <Bridge />
-      <Daylight palette={palette} />
-      <CameraRig />
+      <Daylight palette={palette} shadowMap={coarse ? 1024 : 2048} />
+      <CameraRig kinds={kinds} />
       <Bench palette={palette} />
-      <Suspense fallback={null}>
-        <Phone screens={screens} restPosition={[LAYOUT.phone[0], PHONE.depth / 2, LAYOUT.phone[1]]} />
-      </Suspense>
+      {stops.map((s, i) => (
+        <Device key={s.device} kind={s.device} index={i} screens={s.screens} load={i <= loaded} onLoaded={next} />
+      ))}
     </Canvas>
   );
 }

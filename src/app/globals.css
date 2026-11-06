@@ -1,6 +1,14 @@
 @import "tailwindcss";
 
 /*
+  The tour's two layouts follow the camera, not only the width: text beside the
+  object on a wide screen, text under it on a phone or a tablet held upright.
+  Same test as the scene's portrait framing (Scene.tsx).
+*/
+@custom-variant wide (@media (min-width: 48rem) and (min-aspect-ratio: 9/10));
+@custom-variant narrow (@media not all and (min-width: 48rem) and (min-aspect-ratio: 9/10));
+
+/*
   Direction
   Product    Romaric Soh designs and builds web and mobile apps; this site is for recruiters.
   Character  tactile, exact, warm
@@ -104,7 +112,7 @@
   line-height: 0.86;
   letter-spacing: 0.005em;
   font-weight: 700;
-  text-transform: uppercase;
+  /* Product names keep their own case: Laufwort, 7SETS, PortfolioOS */
   font-optical-sizing: auto;
 }
 /* Step headings inside a chapter: condensed, sentence case */
