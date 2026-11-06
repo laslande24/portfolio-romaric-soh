@@ -73,7 +73,7 @@ export const projects: Project[] = [
       },
     },
     stack: ["Expo SDK 57", "Expo Router", "Reanimated 4", "TypeScript"],
-    links: { code: "https://github.com/laslande24/laufwort" },
+    links: { live: "https://romaricsoh-laufwort.vercel.app", code: "https://github.com/laslande24/laufwort" },
   },
   {
     id: "sevensets",
@@ -99,7 +99,7 @@ export const projects: Project[] = [
       },
     },
     stack: ["Next.js 16", "GSAP", "Lenis", "Playwright"],
-    links: { code: "https://github.com/laslande24/7sets" },
+    links: { live: "https://romaricsoh-7sets.vercel.app", code: "https://github.com/laslande24/7sets" },
   },
   {
     id: "portfolioos",
@@ -125,7 +125,7 @@ export const projects: Project[] = [
       },
     },
     stack: ["React 19", "Vite", "GSAP", "Supabase", "Tailwind"],
-    links: { code: "https://github.com/laslande24/portfolio-os" },
+    links: { live: "https://romaricsoh-os.vercel.app", code: "https://github.com/laslande24/portfolio-os" },
   },
 ];
 
