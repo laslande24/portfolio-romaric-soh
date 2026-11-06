@@ -4,9 +4,10 @@
   Direction
   Product    Romaric Soh designs and builds web and mobile apps; this site is for recruiters.
   Character  tactile, exact, warm
-  World      a workbench: paper, ink, objects with real weight
-  Moments    the workbench (four projects you can pick up), the case study media
-  Signature  crop marks (traits de coupe) around anything that can be picked up
+  World      a daylight workbench in 3D: paper, ink, the real devices his projects run on
+  Moments    each stop of the tour, where a device rises, lights up and can be turned in the hand
+  Signature  crop marks (traits de coupe) drawn on the mat around every object
+  The screen: a guided walk along his own bench, one scroll step per object he built.
 */
 
 /* ---------- Colour: warm paper ramp, one laterite accent ---------- */
@@ -66,7 +67,8 @@
   /* Phone body: a real object, same in both themes */
   --color-device: #0e0d0b;
 
-  --font-sans: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-big-shoulders), "Arial Narrow", ui-sans-serif, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
 
   /* Nested radius: inner = outer - padding, never below 4 */
@@ -83,6 +85,37 @@
 }
 
 /* ---------- Type scale: size + leading + tracking move together ---------- */
+
+/* Poster: giant condensed titles. Uppercase only at this size; tracking opens a
+   little because condensed capitals crowd each other when this big. */
+@utility text-poster {
+  font-family: var(--font-display);
+  font-size: clamp(5rem, 1rem + 15vw, 13rem); /* 80 → 208 */
+  line-height: 0.84;
+  letter-spacing: 0.005em;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-optical-sizing: auto;
+}
+/* Chapter titles of the tour */
+@utility text-chapter {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 2rem + 8vw, 9rem); /* 64 → 144 */
+  line-height: 0.86;
+  letter-spacing: 0.005em;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-optical-sizing: auto;
+}
+/* Step headings inside a chapter: condensed, sentence case */
+@utility text-step {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 1.6rem + 2.2vw, 3.5rem); /* 36 → 56 */
+  line-height: 0.96;
+  letter-spacing: 0;
+  font-weight: 600;
+  text-wrap: balance;
+}
 @utility text-display {
   font-size: clamp(2.5rem, 1.6rem + 3.2vw, 4.5rem); /* 40 → 72 */
   line-height: 1.02;
@@ -134,6 +167,10 @@
 }
 
 /* ---------- Base ---------- */
+/* Lenis drives the scroll on the tour; native smooth scrolling would fight it */
+html.lenis {
+  scroll-behavior: auto;
+}
 html {
   background: var(--paper);
   color: var(--ink);
