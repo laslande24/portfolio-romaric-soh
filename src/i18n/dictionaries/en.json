@@ -43,6 +43,8 @@
     "caseStudy": "Read the case study"
   },
   "work": {
+    "live": "See it live",
+    "code": "Code on GitHub",
     "back": "The workbench",
     "role": "Role",
     "state": "Status",

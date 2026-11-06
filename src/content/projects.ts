@@ -19,6 +19,8 @@ export type Project = {
   summary: Text;
   angle: Record<Role, Text>;
   stack: string[];
+  /** Public links; Redekunst has neither (not deployed, private repository). */
+  links?: { live?: string; code?: string };
 };
 
 export const projects: Project[] = [
@@ -71,6 +73,7 @@ export const projects: Project[] = [
       },
     },
     stack: ["Expo SDK 57", "Expo Router", "Reanimated 4", "TypeScript"],
+    links: { code: "https://github.com/laslande24/laufwort" },
   },
   {
     id: "sevensets",
@@ -96,6 +99,7 @@ export const projects: Project[] = [
       },
     },
     stack: ["Next.js 16", "GSAP", "Lenis", "Playwright"],
+    links: { code: "https://github.com/laslande24/7sets" },
   },
   {
     id: "portfolioos",
@@ -121,6 +125,7 @@ export const projects: Project[] = [
       },
     },
     stack: ["React 19", "Vite", "GSAP", "Supabase", "Tailwind"],
+    links: { code: "https://github.com/laslande24/portfolio-os" },
   },
 ];
 

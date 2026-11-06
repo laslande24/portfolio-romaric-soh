@@ -140,6 +140,30 @@ export default async function CaseStudyPage({ params }: { params: Params }) {
                 </ul>
               </dd>
             </dl>
+
+            {project.links && (
+              <ul className="mt-10 flex flex-wrap gap-3">
+                {(["live", "code"] as const).map((kind) => {
+                  const href = project.links?.[kind];
+                  if (!href) return null;
+                  return (
+                    <li key={kind}>
+                      <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-body inline-flex h-11 items-center gap-2 rounded-control border border-line-strong px-4 font-medium text-ink transition-[transform,background-color] duration-150 ease-out hover:bg-raised active:scale-[0.97]"
+                      >
+                        {t[kind]}
+                        <svg aria-hidden viewBox="0 0 16 16" className="size-4 text-ink-3" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                          <path d="M5 11 11 5M6 5h5v5" />
+                        </svg>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
 
           {/* The moment: the object from the workbench, on the same cutting mat */}

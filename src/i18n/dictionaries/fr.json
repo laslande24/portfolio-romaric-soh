@@ -43,6 +43,8 @@
     "caseStudy": "Lire l'étude de cas"
   },
   "work": {
+    "live": "Voir en ligne",
+    "code": "Code sur GitHub",
     "back": "L'établi",
     "role": "Rôle",
     "state": "État",
