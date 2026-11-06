@@ -1,0 +1,90 @@
+{
+  "meta": {
+    "title": "Romaric Soh, développeur front-end créatif et full-stack",
+    "description": "Romaric Soh dessine et développe des apps web et mobiles avec Next.js, Supabase et Expo."
+  },
+  "nav": {
+    "home": "Romaric Soh, accueil",
+    "main": "Principale",
+    "work": "Travaux",
+    "about": "À propos",
+    "contact": "Contact",
+    "language": "Langue",
+    "switchTo": "Read in English",
+    "cv": "CV",
+    "menu": "Menu"
+  },
+  "hero": {
+    "title": "Je dessine les apps que je code",
+    "lead": "Développeur front-end créatif et full-stack, web et mobile. Je travaille en Next.js, Supabase et Expo, de la première esquisse au produit en ligne.",
+    "primary": "Voir les projets",
+    "secondary": "Me contacter"
+  },
+  "bench": {
+    "region": "Établi avec quatre projets",
+    "hiringFor": "Je recrute pour",
+    "views": {
+      "all": "Tout voir",
+      "frontend": "Front-end",
+      "fullstack": "Full-stack"
+    },
+    "hint": {
+      "all": "Attrape, lance, ouvre. Choisis un poste et l'établi se range",
+      "frontend": "Interfaces et mouvement passent devant : 7SETS et Laufwort",
+      "fullstack": "Données et temps réel passent devant : Redekunst et Laufwort"
+    },
+    "objectHint": "Glisser pour déplacer, Entrée pour ouvrir, flèches pour faire glisser",
+    "close": "Fermer",
+    "forRole": {
+      "frontend": "Pour un poste front-end",
+      "fullstack": "Pour un poste full-stack"
+    },
+    "stack": "Outils",
+    "caseStudy": "Lire l'étude de cas"
+  },
+  "work": {
+    "back": "L'établi",
+    "role": "Rôle",
+    "state": "État",
+    "stack": "Outils",
+    "brief": "Le besoin",
+    "story": "Une décision qui compte",
+    "screens": "Écrans",
+    "now": "Où en est le projet",
+    "next": "Projet suivant"
+  },
+  "about": {
+    "label": "À propos",
+    "experience": "Expérience",
+    "tools": "Outils",
+    "toolsLead": "Où chaque outil a servi. Ouvre un projet pour le voir à l'œuvre.",
+    "toolsCaption": "Les outils, et les projets où chacun a servi",
+    "thisSite": "Ce site",
+    "earlier": "Postes précédents",
+    "earlierShort": "Avant",
+    "used": "Utilisé",
+    "also": "Aussi utilisés",
+    "based": "Basé à",
+    "languages": "Langues",
+    "education": "Formation"
+  },
+  "contact": {
+    "label": "Contact",
+    "lead": "Le plus rapide pour me joindre, c'est l'e-mail.",
+    "copy": "Copier",
+    "copied": "Copié",
+    "cv": "Ouvrir le CV"
+  },
+  "cv": {
+    "title": "CV",
+    "back": "Retour au site",
+    "print": "Imprimer ou enregistrer en PDF",
+    "profile": "Profil",
+    "projects": "Projets choisis",
+    "experience": "Expérience",
+    "education": "Formation",
+    "languages": "Langues",
+    "tools": "Outils",
+    "also": "Aussi utilisés"
+  }
+}

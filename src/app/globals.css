@@ -1,0 +1,260 @@
+@import "tailwindcss";
+
+/*
+  Direction
+  Product    Romaric Soh designs and builds web and mobile apps; this site is for recruiters.
+  Character  tactile, exact, warm
+  World      a workbench: paper, ink, objects with real weight
+  Moments    the workbench (four projects you can pick up), the case study media
+  Signature  crop marks (traits de coupe) around anything that can be picked up
+*/
+
+/* ---------- Colour: warm paper ramp, one laterite accent ---------- */
+:root {
+  --paper: #f1ece2; /* page */
+  --card: #fbf8f2; /* raised sheet */
+  --raised: #e8e1d4; /* hover, active row, input */
+  --ink: #16130f; /* primary text      16.2:1 on paper */
+  --ink-2: #5a5146; /* secondary text     6.5:1 on paper */
+  --ink-3: #736a5e; /* muted, meta only   4.5:1 on paper */
+  --line: rgb(22 19 15 / 0.08);
+  --line-strong: rgb(22 19 15 / 0.16);
+  --accent: #b4441f; /* laterite: 5.5:1 with white, 4.7:1 as text on paper */
+  --accent-press: #9c3a1a;
+  --on-accent: #ffffff;
+  --material: rgb(241 236 226 / 0.72);
+  --mat-line: rgb(22 19 15 / 0.05);
+  --shadow-object: 0 1px 2px rgb(22 19 15 / 0.06), 0 16px 32px -12px rgb(22 19 15 / 0.22);
+  --shadow-lifted: 0 2px 4px rgb(22 19 15 / 0.06), 0 32px 48px -16px rgb(22 19 15 / 0.3);
+  color-scheme: light dark;
+}
+
+/* Night workshop: same roles, warm dark ramp */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #161513;
+    --card: #1c1a18;
+    --raised: #262421;
+    --ink: #efe9de;
+    --ink-2: #aaa398;
+    --ink-3: #8a847a;
+    --line: rgb(239 233 222 / 0.08);
+    --line-strong: rgb(239 233 222 / 0.16);
+    --accent: #e07a52; /* 6.2:1 on night paper, dark text on it */
+    --accent-press: #cc6a44;
+    --on-accent: #16130f;
+    --material: rgb(22 21 19 / 0.72);
+    --mat-line: rgb(239 233 222 / 0.04);
+    --shadow-object: inset 0 1px 0 rgb(239 233 222 / 0.06), 0 16px 32px -12px rgb(0 0 0 / 0.6);
+    --shadow-lifted: inset 0 1px 0 rgb(239 233 222 / 0.08), 0 32px 48px -16px rgb(0 0 0 / 0.7);
+  }
+}
+
+/* ---------- Tailwind theme ---------- */
+@theme inline {
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-raised: var(--raised);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-press: var(--accent-press);
+  --color-on-accent: var(--on-accent);
+  /* Phone body: a real object, same in both themes */
+  --color-device: #0e0d0b;
+
+  --font-sans: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  /* Nested radius: inner = outer - padding, never below 4 */
+  --radius-tag: 6px;
+  --radius-control: 10px;
+  --radius-card: 14px;
+  --radius-window: 18px;
+
+  --shadow-object: var(--shadow-object);
+  --shadow-lifted: var(--shadow-lifted);
+
+  /* One easing curve for every CSS transition. Gestures use springs (src/lib/motion.ts). */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------- Type scale: size + leading + tracking move together ---------- */
+@utility text-display {
+  font-size: clamp(2.5rem, 1.6rem + 3.2vw, 4.5rem); /* 40 → 72 */
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  font-weight: 500;
+  text-wrap: balance;
+}
+@utility text-title {
+  font-size: clamp(1.75rem, 1.45rem + 1vw, 2.25rem); /* 28 → 36 */
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+  text-wrap: balance;
+}
+@utility text-lead {
+  font-size: 1.125rem; /* 18 */
+  line-height: 1.625rem;
+  letter-spacing: 0;
+  text-wrap: pretty;
+}
+@utility text-body {
+  font-size: 0.9375rem; /* 15 */
+  line-height: 1.375rem;
+  letter-spacing: 0;
+}
+@utility text-meta {
+  font-family: var(--font-mono);
+  font-size: 0.75rem; /* 12 */
+  line-height: 1rem;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The workbench surface: a cutting mat, faint 24px grid on the sheet colour */
+@utility mat {
+  background-color: var(--card);
+  background-image:
+    linear-gradient(var(--mat-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--mat-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: -1px -1px;
+}
+
+/* Translucent chrome: content scrolls underneath */
+@utility material {
+  background: var(--material);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+}
+
+/* ---------- Base ---------- */
+html {
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  /* Locking scroll under the project sheet must not shift the layout */
+  scrollbar-gutter: stable;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.5;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ---------- Mobile menu: native popover, grows from the button (top right) ---------- */
+.menu-panel {
+  position: fixed;
+  inset: 4.5rem 0.75rem auto auto;
+  width: min(20rem, calc(100vw - 1.5rem));
+  margin: 0;
+  padding: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-window); /* 18; links inside are 10 = 18 - 8 */
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: var(--shadow-lifted);
+  transform-origin: top right;
+  opacity: 0;
+  transform: translateY(-4px) scale(0.96);
+  transition:
+    opacity 180ms var(--ease-out),
+    transform 180ms var(--ease-out),
+    overlay 180ms allow-discrete,
+    display 180ms allow-discrete;
+}
+.menu-panel:popover-open {
+  opacity: 1;
+  transform: none;
+}
+@starting-style {
+  .menu-panel:popover-open {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
+}
+.menu-panel::backdrop {
+  background: rgb(22 19 15 / 0.12);
+}
+/* The two lines of the button cross into a close mark while the menu is open */
+.menu-line {
+  transition: transform 180ms var(--ease-out);
+}
+body:has(.menu-panel:popover-open) .menu-line:first-child {
+  transform: translateY(5.5px) rotate(45deg);
+}
+body:has(.menu-panel:popover-open) .menu-line:last-child {
+  transform: translateY(-5.5px) rotate(-45deg);
+}
+
+/* ---------- Print: the CV page prints as a plain A4 sheet ---------- */
+@page {
+  size: A4;
+  margin: 14mm 16mm;
+}
+@media print {
+  :root {
+    color-scheme: light;
+    --paper: #ffffff;
+    --card: #ffffff;
+    --raised: #ffffff;
+    --ink: #16130f;
+    --ink-2: #4a433a;
+    --ink-3: #5a5146;
+    --line: rgb(22 19 15 / 0.14);
+    --line-strong: rgb(22 19 15 / 0.2);
+  }
+  html {
+    font-size: 12.5px; /* rem-based type scales down to fit one sheet */
+  }
+}
+
+/* ---------- Accessibility preferences ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .material {
+    background: var(--paper);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --line: color-mix(in srgb, var(--ink) 30%, transparent);
+    --line-strong: color-mix(in srgb, var(--ink) 50%, transparent);
+    --ink-3: var(--ink-2);
+  }
+}
