@@ -14,34 +14,6 @@
     "cv": "CV",
     "menu": "Menu"
   },
-  "hero": {
-    "title": "I design the apps I build",
-    "lead": "Creative front-end and full-stack developer, web and mobile. I work in Next.js, Supabase and Expo, from the first sketch to the shipped product.",
-    "primary": "See the work",
-    "secondary": "Get in touch"
-  },
-  "bench": {
-    "region": "Workbench with four projects",
-    "hiringFor": "Hiring for",
-    "views": {
-      "all": "All work",
-      "frontend": "Front-end",
-      "fullstack": "Full-stack"
-    },
-    "hint": {
-      "all": "Drag, throw, open. Pick a role and the bench sorts itself",
-      "frontend": "Interfaces and motion come forward: 7SETS and Laufwort",
-      "fullstack": "Data and realtime come forward: Redekunst and Laufwort"
-    },
-    "objectHint": "Drag to move, Enter to open, arrow keys to slide",
-    "close": "Close",
-    "forRole": {
-      "frontend": "For front-end roles",
-      "fullstack": "For full-stack roles"
-    },
-    "stack": "Stack",
-    "caseStudy": "Read the case study"
-  },
   "work": {
     "live": "See it live",
     "code": "Code on GitHub",
@@ -53,7 +25,11 @@
     "story": "A decision worth telling",
     "screens": "Screens",
     "now": "Where it stands",
-    "next": "Next project"
+    "next": "Next project",
+    "forRole": {
+      "frontend": "For front-end roles",
+      "fullstack": "For full-stack roles"
+    }
   },
   "cv": {
     "title": "CV",

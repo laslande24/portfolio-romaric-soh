@@ -11,6 +11,7 @@ import Lenis from "lenis";
 import "lenis/dist/lenis.css";
 import type { Beat, DeviceKind, TourCopy } from "@/content/tour";
 import { CopyButton } from "@/components/home/CopyButton";
+import { fitTitle } from "@/lib/fit-title";
 import { STOPS, tour } from "./state";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -65,11 +66,6 @@ function pickMode(): Mode {
  * Big Shoulders at weight 700 runs about 0.45 em per capital. A long name
  * ("PortfolioOS") shrinks to fit its column instead of running under the device.
  */
-function fitTitle(title: string, oneLine = false) {
-  const longest = oneLine ? title.length : Math.max(...title.split(/\s|(?<=-)/).map((w) => w.length));
-  return { fontSize: `min(clamp(4rem, 2rem + 8vw, 9rem), ${(100 / (longest * 0.45)).toFixed(1)}cqi)` };
-}
-
 function Arrow({ className, external }: { className?: string; external?: boolean }) {
   return (
     <svg aria-hidden viewBox="0 0 16 16" className={className} fill="none" stroke="currentColor" strokeWidth={1.5}>

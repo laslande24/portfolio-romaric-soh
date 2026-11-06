@@ -14,34 +14,6 @@
     "cv": "CV",
     "menu": "Menu"
   },
-  "hero": {
-    "title": "Je dessine les apps que je code",
-    "lead": "Développeur front-end créatif et full-stack, web et mobile. Je travaille en Next.js, Supabase et Expo, de la première esquisse au produit en ligne.",
-    "primary": "Voir les projets",
-    "secondary": "Me contacter"
-  },
-  "bench": {
-    "region": "Établi avec quatre projets",
-    "hiringFor": "Je recrute pour",
-    "views": {
-      "all": "Tout voir",
-      "frontend": "Front-end",
-      "fullstack": "Full-stack"
-    },
-    "hint": {
-      "all": "Attrape, lance, ouvre. Choisis un poste et l'établi se range",
-      "frontend": "Interfaces et mouvement passent devant : 7SETS et Laufwort",
-      "fullstack": "Données et temps réel passent devant : Redekunst et Laufwort"
-    },
-    "objectHint": "Glisser pour déplacer, Entrée pour ouvrir, flèches pour faire glisser",
-    "close": "Fermer",
-    "forRole": {
-      "frontend": "Pour un poste front-end",
-      "fullstack": "Pour un poste full-stack"
-    },
-    "stack": "Outils",
-    "caseStudy": "Lire l'étude de cas"
-  },
   "work": {
     "live": "Voir en ligne",
     "code": "Code sur GitHub",
@@ -53,7 +25,11 @@
     "story": "Une décision qui compte",
     "screens": "Écrans",
     "now": "Où en est le projet",
-    "next": "Projet suivant"
+    "next": "Projet suivant",
+    "forRole": {
+      "frontend": "Pour un poste front-end",
+      "fullstack": "Pour un poste full-stack"
+    }
   },
   "cv": {
     "title": "CV",

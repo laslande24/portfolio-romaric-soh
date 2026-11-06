@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
@@ -26,12 +26,55 @@ type Fonts = { display: string; sans: string };
 /** Draws in thousandths of a scene unit: a 0.4-unit badge is 400 wide. */
 type Draw = (g: CanvasRenderingContext2D, f: Fonts) => void;
 
-function usePrint(w: number, h: number, draw: Draw, background = PAPER) {
+/*
+  Prints wait their turn: drawn and uploaded together they cost one long frame
+  on a phone. Each job runs when the main thread is free, one at a time.
+*/
+const queue: (() => void)[] = [];
+function drain() {
+  const idle = window.requestIdleCallback ?? ((job: () => void) => window.setTimeout(job, 16));
+  idle(
+    () => {
+      try {
+        queue.shift()?.();
+      } finally {
+        if (queue.length) drain();
+      }
+    },
+    { timeout: 1500 },
+  );
+}
+function whenIdle(job: () => void) {
+  if (queue.push(job) === 1) drain();
+}
+
+/** Plain stock until the print is ready: a 1×1 texture, so the material keeps its shader. */
+const blanks = new Map<string, THREE.Texture>();
+function blank(colour: string) {
+  let t = blanks.get(colour);
+  if (!t) {
+    const c = document.createElement("canvas");
+    c.width = c.height = 1;
+    const g = c.getContext("2d")!;
+    g.fillStyle = colour;
+    g.fillRect(0, 0, 1, 1);
+    t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace;
+    blanks.set(colour, t);
+  }
+  return t;
+}
+
+/** A print on paper, drawn once `load` comes (after the devices' screens) in a quiet moment. */
+function usePrint(w: number, h: number, draw: Draw, load: boolean, background = PAPER) {
   const gl = useThree((s) => s.gl);
+  const [ready, setReady] = useState(false);
   const texture = useMemo(() => {
     const c = document.createElement("canvas");
-    // Sharper than the camera ever shows them: ~1300 px per unit on the badge, ~800 on a sheet
-    const ppu = Math.min(1300, 1600 / Math.max(w, h));
+    // Sharper than the camera ever shows them: ~1300 px per unit on the badge, ~800 on a sheet;
+    // touch screens frame the sheets smaller, so 1024 px on the long side is plenty there
+    const budget = matchMedia("(pointer: coarse)").matches ? 1024 : 1600;
+    const ppu = Math.min(1300, budget / Math.max(w, h));
     c.width = Math.round(w * ppu);
     c.height = Math.round(h * ppu);
     const t = new THREE.CanvasTexture(c);
@@ -41,34 +84,42 @@ function usePrint(w: number, h: number, draw: Draw, background = PAPER) {
   }, [w, h]);
 
   useEffect(() => {
+    if (!load) return;
     let live = true;
     const css = getComputedStyle(document.documentElement);
     const f = { display: css.getPropertyValue("--font-big-shoulders").trim(), sans: css.getPropertyValue("--font-hanken").trim() };
     Promise.all([document.fonts.load(`700 100px ${f.display}`), document.fonts.load(`500 40px ${f.sans}`)])
       .catch(() => [])
-      .then(() => {
-        if (!live) return;
-        const c = texture.image as HTMLCanvasElement;
-        const g = c.getContext("2d")!;
-        g.setTransform(c.width / (w * 1000), 0, 0, c.height / (h * 1000), 0, 0);
-        g.fillStyle = background;
-        g.fillRect(0, 0, w * 1000, h * 1000);
-        draw(g, f);
-        // A hairline at the edge, as paper catches the light
-        g.strokeStyle = "rgba(29, 26, 22, 0.14)";
-        g.lineWidth = 6;
-        g.strokeRect(0, 0, w * 1000, h * 1000);
-        texture.needsUpdate = true;
-        gl.initTexture(texture);
-        tour.invalidate();
-      });
+      .then(() =>
+        whenIdle(() => {
+          if (!live) return;
+          const c = texture.image as HTMLCanvasElement;
+          const g = c.getContext("2d")!;
+          g.setTransform(c.width / (w * 1000), 0, 0, c.height / (h * 1000), 0, 0);
+          g.fillStyle = background;
+          g.fillRect(0, 0, w * 1000, h * 1000);
+          draw(g, f);
+          // A hairline at the edge, as paper catches the light
+          g.strokeStyle = "rgba(29, 26, 22, 0.14)";
+          g.lineWidth = 6;
+          g.strokeRect(0, 0, w * 1000, h * 1000);
+          texture.needsUpdate = true;
+          // The upload gets its own quiet moment, not the frame that first shows the print
+          whenIdle(() => {
+            if (!live) return;
+            gl.initTexture(texture);
+            setReady(true);
+            tour.invalidate();
+          });
+        }),
+      );
     return () => {
       live = false;
     };
-  }, [texture, draw, w, h, gl, background]);
+  }, [texture, draw, w, h, gl, background, load]);
 
   useEffect(() => () => texture.dispose(), [texture]);
-  return texture;
+  return ready ? texture : blank(background);
 }
 
 const type = (g: CanvasRenderingContext2D, weight: number, size: number, family: string, colour = INK) => {
@@ -154,7 +205,7 @@ function roundedRect(w: number, h: number, r: number) {
   return s;
 }
 
-export function BadgeBody() {
+export function BadgeBody({ load }: { load: boolean }) {
   const { card, face } = useMemo(() => {
     const shape = roundedRect(BADGE.w, BADGE.h, BADGE.r);
     const card = new THREE.ExtrudeGeometry(shape, { depth: BADGE.depth, bevelEnabled: false, curveSegments: 8 });
@@ -166,8 +217,8 @@ export function BadgeBody() {
     for (let i = 0; i < p.count; i++) uv.setXY(i, p.getX(i) / BADGE.w + 0.5, p.getY(i) / BADGE.h + 0.5);
     return { card, face };
   }, []);
-  const front = usePrint(BADGE.w, BADGE.h, badgeFront, CARD);
-  const back = usePrint(BADGE.w, BADGE.h, badgeBack, CARD);
+  const front = usePrint(BADGE.w, BADGE.h, badgeFront, load, CARD);
+  const back = usePrint(BADGE.w, BADGE.h, badgeBack, load, CARD);
   const z = BADGE.depth / 2 + 0.0005;
   return (
     <>
@@ -283,10 +334,10 @@ const notebookSpread: Draw = (g, f) => {
   }
 };
 
-export function NotebookBody() {
+export function NotebookBody({ load }: { load: boolean }) {
   const cover = useMemo(() => new RoundedBoxGeometry(2, 1.41, 0.02, 2, 0.008), []);
   const pages = useMemo(() => sheet(SPREAD.w, SPREAD.h, 0.012), []);
-  const print = usePrint(SPREAD.w, SPREAD.h, notebookSpread);
+  const print = usePrint(SPREAD.w, SPREAD.h, notebookSpread, load);
   return (
     <>
       <mesh geometry={cover} position={[0, 0, -0.01]} castShadow>
@@ -347,9 +398,9 @@ const diploma: Draw = (g, f) => {
   g.stroke();
 };
 
-export function DiplomaBody() {
+export function DiplomaBody({ load }: { load: boolean }) {
   const geometry = useMemo(() => sheet(DIPLOMA.w, DIPLOMA.h, 0.016), []);
-  const print = usePrint(DIPLOMA.w, DIPLOMA.h, diploma);
+  const print = usePrint(DIPLOMA.w, DIPLOMA.h, diploma, load);
   return <Sheet geometry={geometry} map={print} />;
 }
 
@@ -377,8 +428,8 @@ const certificate: Draw = (g, f) => {
   g.fillText("2026", 120, 1290);
 };
 
-export function CertificateBody() {
+export function CertificateBody({ load }: { load: boolean }) {
   const geometry = useMemo(() => sheet(CERTIFICATE.w, CERTIFICATE.h, 0.014), []);
-  const print = usePrint(CERTIFICATE.w, CERTIFICATE.h, certificate);
+  const print = usePrint(CERTIFICATE.w, CERTIFICATE.h, certificate, load);
   return <Sheet geometry={geometry} map={print} />;
 }

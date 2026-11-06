@@ -408,7 +408,8 @@ function useTurn(index: number, tip: number) {
 const aluminium = { color: "#cfcbc4", metalness: 0.75, roughness: 0.38 } as const;
 
 /** `material` is the screen; the papers have none. */
-type BodyProps = { material?: THREE.ShaderMaterial; index: number };
+/** `load`: the papers draw their prints once it comes. */
+type BodyProps = { material?: THREE.ShaderMaterial; index: number; load: boolean };
 
 function PhoneBody({ material }: BodyProps) {
   const geometry = useMemo(() => {
@@ -604,7 +605,7 @@ export function Device({
   return (
     <group ref={root} rotation-order="YXZ">
       <group ref={spin} {...turn.handlers}>
-        <Body material={material ?? undefined} index={index} />
+        <Body material={material ?? undefined} index={index} load={load} />
       </group>
       {load && material && spec.screen && (
         <Suspense fallback={null}>

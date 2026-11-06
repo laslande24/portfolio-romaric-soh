@@ -19,8 +19,11 @@ export default function GlobalNotFound() {
           <a href="/en" className="text-body font-medium">
             Romaric Soh
           </a>
-          <p className="text-meta mt-16 text-ink-3">404</p>
-          <h1 className="text-display mt-3 max-w-[14ch]">Nothing on the bench here</h1>
+          <p className="text-body mt-16 font-medium text-accent">404</p>
+          {/* Two lines of lowercase: open the leading so descenders clear the next line */}
+          <h1 className="text-chapter mt-2 text-balance" style={{ lineHeight: 1 }}>
+            Nothing on the bench here
+          </h1>
           <p className="text-lead mt-6 max-w-[36rem] text-ink-2">This page does not exist, or it has moved.</p>
           <p lang="fr" className="text-body mt-2 max-w-[36rem] text-ink-3">
             {"Rien sur l'établi ici : cette page n'existe pas, ou elle a changé de place."}

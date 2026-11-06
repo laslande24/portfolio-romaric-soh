@@ -3,7 +3,7 @@ import { siteUrl } from "@/content/profile";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/en/fondations", "/fr/fondations"] },
+    rules: { userAgent: "*", allow: "/" },
     sitemap: `${siteUrl}/sitemap.xml`,
   };
 }

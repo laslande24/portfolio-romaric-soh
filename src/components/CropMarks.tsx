@@ -1,7 +1,7 @@
 /**
  * Signature detail: printer's crop marks outside the four corners of a box.
- * Used only around things that can be picked up (workbench objects, case
- * study media). The parent must be `position: relative`.
+ * Used only around objects: a case study's hero capture, the CV sheet.
+ * The parent must be `position: relative`.
  */
 
 type Corner = { x: "left" | "right"; y: "top" | "bottom" };

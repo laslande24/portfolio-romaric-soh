@@ -1,4 +1,4 @@
-import { Big_Shoulders, Geist_Mono, Hanken_Grotesk } from "next/font/google";
+import { Big_Shoulders, Hanken_Grotesk } from "next/font/google";
 
 // Big Shoulders: condensed poster face for the giant titles. Variable weight
 // (the tour thins it out as the camera leaves) and an optical-size axis that
@@ -17,11 +17,4 @@ const hanken = Hanken_Grotesk({
   display: "swap",
 });
 
-// ponytail: mono stays for the case studies and CV meta until phase D retypes them.
-const geistMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-geist-mono",
-  display: "swap",
-});
-
-export const fontVars = `${bigShoulders.variable} ${hanken.variable} ${geistMono.variable}`;
+export const fontVars = `${bigShoulders.variable} ${hanken.variable}`;

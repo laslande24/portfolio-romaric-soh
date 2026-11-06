@@ -64,7 +64,7 @@ export default async function CvPage({ params }: { params: Params }) {
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4 print:hidden">
           <Link
             href={`/${lang}#contact`}
-            className="text-meta inline-flex items-center gap-2 text-ink-3 transition-colors duration-150 ease-out hover:text-ink"
+            className="text-body inline-flex min-h-11 items-center gap-2 text-ink-3 transition-colors duration-150 ease-out hover:text-ink"
           >
             <svg aria-hidden viewBox="0 0 16 16" className="size-4" fill="none" stroke="currentColor" strokeWidth={1.5}>
               <path d="M13 8H3M7 4 3 8l4 4" />
@@ -81,7 +81,7 @@ export default async function CvPage({ params }: { params: Params }) {
           </span>
 
           <header>
-            <h1 className="text-title">Romaric Soh</h1>
+            <h1 className="text-step">Romaric Soh</h1>
             <p className="text-lead mt-1 text-ink-2">{headline[lang]}</p>
             <ul className="text-meta mt-4 flex flex-wrap gap-x-4 text-ink-2 [&_a]:inline-flex [&_a]:min-h-6 [&_a]:items-center print:[&_a]:min-h-0">
               <li>
