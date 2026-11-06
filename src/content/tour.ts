@@ -1,13 +1,24 @@
 import type { Locale } from "@/i18n/config";
 import type { ProjectId } from "@/content/projects";
+import { alsoUsed, education, experience, type Job } from "@/content/profile";
 
-/** The object each project sits on, on the bench. */
-export type DeviceKind = "phone" | "laptop" | "tablet" | "display";
+/**
+ * Everything on the bench: a device for each project, then the papers of the
+ * path at the far end (a work badge, a notebook, a degree, a certificate).
+ */
+export type DeviceKind = "phone" | "laptop" | "tablet" | "display" | "badge" | "notebook" | "diploma" | "certificate";
+type PaperKind = Extract<DeviceKind, "badge" | "notebook" | "diploma" | "certificate">;
 
-/** One step of a stop: the device shows `screen` while this text is read. */
-export type Beat = { screen: string; alt: string; title: string; body: string };
+/**
+ * One step of a stop. On a device, `screen` is what it shows while this text
+ * is read; `kicker` is a step's own role and dates, when it has any.
+ */
+export type Beat = { screen?: string; alt?: string; kicker?: string; title: string; body: string };
 
-export type StopCopy = { id: ProjectId; device: DeviceKind; beats: Beat[] };
+export type StopCopy = { id: ProjectId; device: Exclude<DeviceKind, PaperKind>; beats: Beat[] };
+
+/** A chapter of the path: one paper, and the tools that went with it. */
+export type ChapterCopy = { id: string; device: PaperKind; kicker: string; beats: Beat[]; tools?: string[] };
 
 export type TourCopy = {
   role: string;
@@ -15,10 +26,63 @@ export type TourCopy = {
   hintMouse: string;
   hintTouch: string;
   caseStudy: string;
-  /** Walking order along the bench. */
+  /** Walking order along the bench: the projects, then the path. */
   stops: StopCopy[];
+  path: ChapterCopy[];
+  contact: { kicker: string; title: string; lead: string; copy: string; copied: string; cv: string };
   end: string;
+  also: string;
 };
+
+/* ---------- The path, read from the same facts as the CV ---------- */
+
+const [afreetech, qta, peexit] = experience;
+const job = (j: Job, lang: Locale) => `${j.role[lang]}, ${j.place}, ${j.dates[lang]}`;
+/** "MINT weather project: wrote the…" → a step titled by its project. */
+const step = (point: string): Beat => {
+  const i = point.indexOf(":");
+  const body = point.slice(i + 1).trim();
+  return { title: point.slice(0, i).trim(), body: body[0].toUpperCase() + body.slice(1) };
+};
+
+function path(
+  lang: Locale,
+  t: { afreetech: string; education: string; degree: string; languages: string; german: string },
+): ChapterCopy[] {
+  const [pagirn, mint, eagles] = afreetech.points[lang];
+  return [
+    {
+      id: "afreetech",
+      device: "badge",
+      kicker: job(afreetech, lang),
+      // The badge turns over on the last step: its back lists these
+      tools: afreetech.tools,
+      beats: [{ title: afreetech.org, body: `${t.afreetech} ${pagirn}` }, step(mint), step(eagles)],
+    },
+    {
+      id: "internships",
+      device: "notebook",
+      kicker: job(qta, lang),
+      tools: [...qta.tools, ...peexit.tools],
+      beats: [
+        { title: qta.org, body: qta.points[lang][0] },
+        { kicker: job(peexit, lang), title: peexit.org, body: peexit.points[lang][0] },
+      ],
+    },
+    {
+      id: "education",
+      device: "diploma",
+      kicker: t.education,
+      beats: [{ title: "Bachelor of Engineering", body: t.degree }],
+    },
+    {
+      id: "languages",
+      device: "certificate",
+      kicker: t.languages,
+      beats: [{ title: "Goethe-Zertifikat B2", body: t.german }],
+    },
+  ];
+}
 
 const s = {
   laufwort: {
@@ -141,7 +205,23 @@ export const tour: Record<Locale, TourCopy> = {
         ],
       },
     ],
+    path: path("en", {
+      afreetech: "Ten months on public-sector platforms in Cameroon.",
+      education: `Education, ${education.years}`,
+      degree: `Computer Science. ${education.school.en}.`,
+      languages: "Languages",
+      german: "German, certified in 2026. French is my native language, and my English is fluent.",
+    }),
+    contact: {
+      kicker: "Contact",
+      title: "Write to me",
+      lead: "Email is the quickest way to reach me, in French, English or German.",
+      copy: "Copy",
+      copied: "Copied",
+      cv: "Open the CV",
+    },
     end: "Everything on the bench",
+    also: `Also used: ${alsoUsed.join(", ")}`,
   },
   fr: {
     role: "Développeur front-end et full-stack. Je dessine les apps que je code, pour le web et pour le téléphone.",
@@ -247,6 +327,22 @@ export const tour: Record<Locale, TourCopy> = {
         ],
       },
     ],
+    path: path("fr", {
+      afreetech: "Dix mois sur des plateformes publiques au Cameroun.",
+      education: `Formation, ${education.years}`,
+      degree: `Informatique. ${education.school.fr}.`,
+      languages: "Langues",
+      german: "L'allemand, certifié en 2026. Le français est ma langue maternelle, et je parle couramment anglais.",
+    }),
+    contact: {
+      kicker: "Contact",
+      title: "Écris-moi",
+      lead: "Le plus rapide, c'est l'e-mail, en français, en anglais ou en allemand.",
+      copy: "Copier",
+      copied: "Copié",
+      cv: "Ouvrir le CV",
+    },
     end: "Tout ce qui est sur l'établi",
+    also: `Aussi utilisés : ${alsoUsed.join(", ")}`,
   },
 };

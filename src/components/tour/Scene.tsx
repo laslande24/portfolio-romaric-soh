@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
@@ -28,6 +28,9 @@ function usePalette(): Palette {
 
 /* ---------- Camera: poses blended by scroll, then followed with damping ---------- */
 
+/** Where the camera looks now; the sunlight's shadow box follows it down the bench. */
+const looking = new THREE.Vector3();
+
 type Pose = {
   target: THREE.Vector3;
   /** From the target towards the camera. */
@@ -36,6 +39,8 @@ type Pose = {
   fit: [number, number];
   /** Lens shift, as a fraction of the viewport: positive moves the picture right / down. */
   shift: THREE.Vector2;
+  /** Rise on the way to this pose, at the middle of the walk. */
+  hop: number;
 };
 
 /** The whole bench, then each stop in walking order, then the whole bench again. */
@@ -49,6 +54,7 @@ function poses(portrait: boolean, kinds: DeviceKind[]): Pose[] {
       dir: new THREE.Vector3(...(portrait ? [-0.1, 0.55, 0.83] : [0.3, 0.8, 0.52])).normalize(),
       fit: portrait ? [4.4, 6.8] : [13, 8.2],
       shift: new THREE.Vector2(...(portrait ? [0, 0.24] : [0.22, 0])),
+      hop: 0,
     },
     // Face to face with each device, pushed right (desktop) or up (phone) beside its text
     ...kinds.map((k) => {
@@ -58,14 +64,16 @@ function poses(portrait: boolean, kinds: DeviceKind[]): Pose[] {
         dir: new THREE.Vector3(...view.dir).normalize(),
         fit: pick(view.fit),
         shift: new THREE.Vector2(...pick(view.shift)),
+        hop: view.hop ?? 0,
       };
     }),
-    // Pull back and look down the whole bench
+    // Pull back from the far end and look up the whole bench, devices to papers
     {
-      target: new THREE.Vector3(0.3, 0, -0.6),
-      dir: new THREE.Vector3(0.4, 0.66, 0.62).normalize(),
-      fit: portrait ? [4.4, 7.4] : [11, 6.8],
-      shift: new THREE.Vector2(...(portrait ? [0, 0.26] : [0.24, 0.04])),
+      target: new THREE.Vector3(0.3, 0, -5),
+      dir: new THREE.Vector3(...(portrait ? [-0.1, 0.62, 0.78] : [0.36, 0.74, 0.57])).normalize(),
+      fit: portrait ? [5, 11] : [15, 9.5],
+      shift: new THREE.Vector2(...(portrait ? [0, 0.3] : [0.24, 0.04])),
+      hop: 0,
     },
   ];
 }
@@ -86,7 +94,7 @@ function CameraRig({ kinds }: { kinds: DeviceKind[] }) {
 
   // What the camera shows now, followed towards the scroll's pose each frame
   const now = useMemo(
-    () => ({ target: new THREE.Vector3(), dir: new THREE.Vector3(), dist: 0, shift: new THREE.Vector2(), ready: false }),
+    () => ({ target: new THREE.Vector3(), dir: new THREE.Vector3(), dist: 0, hop: 0, shift: new THREE.Vector2(), ready: false }),
     [],
   );
   const scratch = useMemo(() => ({ target: new THREE.Vector3(), dir: new THREE.Vector3(), shift: new THREE.Vector2() }), []);
@@ -103,12 +111,15 @@ function CameraRig({ kinds }: { kinds: DeviceKind[] }) {
     dir.copy(p[0].dir);
     shift.copy(p[0].shift);
     let dist = distFor(p[0].fit);
+    let hop = 0;
     for (let k = 1; k < p.length; k++) {
       const t = smoothstep(0, 1, tour.travel[k - 1]);
       target.lerp(p[k].target, t);
       dir.lerp(p[k].dir, t);
       shift.lerp(p[k].shift, t);
       dist += (distFor(p[k].fit) - dist) * t;
+      // Only the leg being walked is between 0 and 1, so at most one hop shows
+      hop += p[k].hop * Math.sin(Math.PI * t);
     }
     dir.normalize();
 
@@ -118,20 +129,23 @@ function CameraRig({ kinds }: { kinds: DeviceKind[] }) {
     now.target.lerp(target, k);
     now.dir.lerp(dir, k).normalize();
     now.dist += (dist - now.dist) * k;
+    now.hop += (hop - now.hop) * k;
     now.shift.lerp(shift, k);
 
     camera.position.copy(now.target).addScaledVector(now.dir, now.dist);
+    camera.position.y += now.hop;
     // The mat's far edge melts into the paper, whatever the distance
     if (scene.fog instanceof THREE.Fog) {
       scene.fog.near = now.dist * 1.4;
       scene.fog.far = now.dist * 3.2;
     }
     camera.lookAt(now.target);
+    looking.copy(now.target);
     const { width: w, height: h } = size;
     camera.setViewOffset(w, h, -now.shift.x * w, -now.shift.y * h, w, h);
 
     const settled =
-      now.target.distanceToSquared(target) < 1e-8 && Math.abs(now.dist - dist) < 1e-4 && now.shift.distanceToSquared(shift) < 1e-8;
+      now.target.distanceToSquared(target) < 1e-8 && Math.abs(now.dist - dist) < 1e-4 && Math.abs(now.hop - hop) < 1e-4 && now.shift.distanceToSquared(shift) < 1e-8;
     if (!settled) tour.invalidate();
   });
   return null;
@@ -139,9 +153,21 @@ function CameraRig({ kinds }: { kinds: DeviceKind[] }) {
 
 /* ---------- Light: soft daylight from the upper left, a warm room for reflections ---------- */
 
+const SUN = new THREE.Vector3(-3.5, 7, 4);
+
 function Daylight({ palette, shadowMap }: { palette: Palette; shadowMap: number }) {
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
+  const sun = useRef<THREE.DirectionalLight>(null);
+
+  // Same light everywhere: only its shadow box travels with the camera
+  useFrame(() => {
+    const light = sun.current;
+    if (!light) return;
+    light.position.copy(looking).add(SUN);
+    light.target.position.copy(looking);
+    light.target.updateMatrixWorld();
+  });
   const dark = useMemo(() => new THREE.Color(palette.paper).getHSL({ h: 0, s: 0, l: 0 }).l < 0.3, [palette.paper]);
 
   useEffect(() => {
@@ -165,7 +191,8 @@ function Daylight({ palette, shadowMap }: { palette: Palette; shadowMap: number 
     <>
       <hemisphereLight args={[dark ? "#c8c0b4" : "#fffaf1", palette.paper, dark ? 0.45 : 1.35]} />
       <directionalLight
-        position={[-3.5, 7, 4]}
+        ref={sun}
+        position={SUN.toArray()}
         intensity={dark ? 1.1 : 2.1}
         color={dark ? "#ffd9b8" : "#fff3e2"}
         castShadow

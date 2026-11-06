@@ -10,6 +10,7 @@ import { useGSAP } from "@gsap/react";
 import Lenis from "lenis";
 import "lenis/dist/lenis.css";
 import type { Beat, DeviceKind, TourCopy } from "@/content/tour";
+import { CopyButton } from "@/components/home/CopyButton";
 import { STOPS, tour } from "./state";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -17,19 +18,23 @@ gsap.registerPlugin(useGSAP, ScrollTrigger);
 // The 3D bench loads after the text, on the client only.
 const Scene = dynamic(() => import("./Scene"), { ssr: false });
 
+/** A project (status, links, case study) or a chapter of the path (tools only). */
 export type Stop = {
   id: string;
+  /** Section id for the header's links. */
+  anchor?: string;
   device: DeviceKind;
   name: string;
   kicker: string;
-  status: string;
-  stack: string[];
+  status?: string;
+  stack?: string[];
   live?: string;
   code?: string;
-  caseStudy: string;
+  caseStudy?: string;
   beats: Beat[];
 };
-type Props = { copy: TourCopy; stops: Stop[]; labels: { live: string; code: string } };
+type Reach = { email: string; linkedin: string; github: string; cv: string; location: string };
+type Props = { copy: TourCopy; stops: Stop[]; labels: { live: string; code: string }; reach: Reach };
 
 type Mode = "pending" | "3d" | "lite";
 
@@ -60,18 +65,21 @@ function pickMode(): Mode {
  * Big Shoulders at weight 700 runs about 0.45 em per capital. A long name
  * ("PortfolioOS") shrinks to fit its column instead of running under the device.
  */
-function fitTitle(title: string) {
-  const longest = Math.max(...title.split(/\s|(?<=-)/).map((w) => w.length));
+function fitTitle(title: string, oneLine = false) {
+  const longest = oneLine ? title.length : Math.max(...title.split(/\s|(?<=-)/).map((w) => w.length));
   return { fontSize: `min(clamp(4rem, 2rem + 8vw, 9rem), ${(100 / (longest * 0.45)).toFixed(1)}cqi)` };
 }
 
-function Arrow({ className }: { className?: string }) {
+function Arrow({ className, external }: { className?: string; external?: boolean }) {
   return (
     <svg aria-hidden viewBox="0 0 16 16" className={className} fill="none" stroke="currentColor" strokeWidth={1.5}>
-      <path d="M3 8h10M9 4l4 4-4 4" />
+      <path d={external ? "M5 11 11 5M6 5h5v5" : "M3 8h10M9 4l4 4-4 4"} />
     </svg>
   );
 }
+
+const quiet =
+  "text-body inline-flex h-11 items-center gap-2 rounded-control border border-line-strong px-4 font-medium text-ink transition-[transform,background-color] duration-150 ease-out hover:bg-raised active:scale-[0.97]";
 
 /** Lite mode: the stop's device as a still, sticky beside the text. */
 function StillDevice({ stop, beat }: { stop: Stop; beat: number }) {
@@ -91,7 +99,7 @@ function StillDevice({ stop, beat }: { stop: Stop; beat: number }) {
                 {stop.beats.map((b, i) => (
                   <Image
                     key={b.screen}
-                    src={b.screen}
+                    src={b.screen!}
                     width={phone ? 780 : 1280}
                     height={phone ? 1782 : 800}
                     alt=""
@@ -109,12 +117,15 @@ function StillDevice({ stop, beat }: { stop: Stop; beat: number }) {
   );
 }
 
-export function Tour({ copy, stops, labels }: Props) {
+export function Tour({ copy, stops, labels, reach }: Props) {
   const root = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<Mode>("pending");
   const [ready, setReady] = useState(false);
   const [shown, setShown] = useState(() => stops.map(() => 0));
-  const scene = useMemo(() => stops.map((s) => ({ device: s.device, screens: s.beats.map((b) => webp(b.screen)) })), [stops]);
+  const scene = useMemo(
+    () => stops.map((s) => ({ device: s.device, screens: s.beats.flatMap((b) => (b.screen ? [webp(b.screen)] : [])) })),
+    [stops],
+  );
 
   useEffect(() => {
     const m = pickMode();
@@ -256,14 +267,15 @@ export function Tour({ copy, stops, labels }: Props) {
         </div>
       </section>
 
-      {/* One stop per project. The device stays in the scene; the steps scroll past it */}
+      {/* One stop per project, then per paper of the path. The object stays in the scene; the steps scroll past it */}
       {stops.map((stop, k) => (
-        <section key={stop.id} data-stop aria-labelledby={`${stop.id}-title`} className="pointer-events-none relative z-10">
-          {mode === "lite" && <StillDevice stop={stop} beat={shown[k]} />}
+        <section key={stop.id} id={stop.anchor} data-stop aria-labelledby={`${stop.id}-title`} className="pointer-events-none relative z-10">
+          {/* ponytail: the lite tour shows the devices only; the papers are read as text */}
+          {mode === "lite" && stop.beats[0].screen && <StillDevice stop={stop} beat={shown[k]} />}
 
           {stop.beats.map((b, i) => (
             <div
-              key={b.screen}
+              key={i}
               data-beat
               className="mx-auto flex min-h-svh max-w-[1440px] items-end px-4 pb-6 wide:items-center wide:px-8 wide:pb-0"
             >
@@ -278,14 +290,21 @@ export function Tour({ copy, stops, labels }: Props) {
                     </h2>
                   </>
                 ) : (
-                  <h3 data-reveal className="text-step">
-                    {b.title}
-                  </h3>
+                  <>
+                    {b.kicker && (
+                      <p data-reveal className="text-body mb-2 font-medium text-accent">
+                        {b.kicker}
+                      </p>
+                    )}
+                    <h3 data-reveal className="text-step">
+                      {b.title}
+                    </h3>
+                  </>
                 )}
                 <p data-reveal className="text-lead mt-4 text-ink-2 wide:mt-6">
                   {b.body}
                 </p>
-                <p className="sr-only">{b.alt}</p>
+                {b.alt && <p className="sr-only">{b.alt}</p>}
 
                 {k === 0 && i === 0 && mode === "3d" && (
                   <p data-reveal className="text-body mt-6 flex items-center gap-2 text-ink-3 narrow:hidden">
@@ -299,12 +318,17 @@ export function Tour({ copy, stops, labels }: Props) {
 
                 {i === stop.beats.length - 1 && (
                   <>
-                    <p data-reveal className="text-body mt-6 text-ink-2">
-                      {stop.status}
-                    </p>
-                    <p data-reveal className="text-body mt-1 text-ink-3">
-                      {stop.stack.join(", ")}
-                    </p>
+                    {stop.status && (
+                      <p data-reveal className="text-body mt-6 text-ink-2">
+                        {stop.status}
+                      </p>
+                    )}
+                    {stop.stack && (
+                      <p data-reveal className={`text-body text-ink-3 ${stop.status ? "mt-1" : "mt-6"}`}>
+                        {stop.stack.join(", ")}
+                      </p>
+                    )}
+                    {stop.caseStudy && (
                     <div data-reveal className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
                       <Link
                         href={stop.caseStudy}
@@ -324,6 +348,7 @@ export function Tour({ copy, stops, labels }: Props) {
                         </a>
                       )}
                     </div>
+                    )}
                   </>
                 )}
               </div>
@@ -332,26 +357,73 @@ export function Tour({ copy, stops, labels }: Props) {
         </section>
       ))}
 
-      {/* The end: the camera pulls back over the whole bench, every project one click away */}
+      {/* The end: the camera pulls back over the whole bench. How to reach me, and every project one click away */}
       <section
+        id="contact"
         data-chapter="end"
-        aria-labelledby="bench-title"
-        className="pointer-events-none relative z-10 mx-auto flex min-h-svh max-w-[1440px] items-start px-6 pt-24 wide:items-center wide:px-8 wide:pt-0"
+        aria-labelledby="contact-title"
+        className="pointer-events-none relative z-10 mx-auto flex min-h-svh max-w-[1440px] items-end px-4 pt-24 pb-6 wide:items-center wide:px-8 wide:py-24"
       >
-        <div className="pointer-events-auto">
-          <h2 id="bench-title" data-reveal className="text-body font-medium text-accent">
-            {copy.end}
+        <div className="pointer-events-auto w-full max-w-[30rem] rounded-window border border-line p-5 @container narrow:material wide:max-w-[min(30rem,44vw)] wide:border-0 wide:p-0">
+          <p data-reveal className="text-body font-medium text-accent">
+            {copy.contact.kicker}
+          </p>
+          {/* One line: "Écris-moi" must not break at its hyphen; mt-4 leaves room for the accent */}
+          <h2 id="contact-title" data-reveal className="text-chapter mt-4 whitespace-nowrap" style={fitTitle(copy.contact.title, true)}>
+            {copy.contact.title}
           </h2>
-          <ul className="mt-4">
-            {stops.map((s) => (
-              <li key={s.id} data-reveal>
-                <Link href={s.caseStudy} className="group flex items-baseline gap-4 py-1">
-                  <span className="text-step transition-colors duration-150 ease-out group-hover:text-accent">{s.name}</span>
-                  <span className="text-body text-ink-3">{s.kicker}</span>
-                </Link>
-              </li>
-            ))}
+          <p data-reveal className="text-lead mt-4 text-ink-2 wide:mt-6">
+            {copy.contact.lead}
+          </p>
+          <div data-reveal className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3">
+            <a
+              href={`mailto:${reach.email}`}
+              className="text-title break-words underline decoration-line-strong decoration-1 underline-offset-[0.2em] transition-colors duration-150 ease-out hover:decoration-current"
+            >
+              {reach.email}
+            </a>
+            <CopyButton text={reach.email} copy={copy.contact.copy} copied={copy.contact.copied} />
+          </div>
+          <p data-reveal className="text-body mt-4 text-ink-3">
+            {reach.location}
+          </p>
+          <ul data-reveal className="mt-6 flex flex-wrap gap-3">
+            <li>
+              <a href={`https://${reach.linkedin}`} target="_blank" rel="noopener noreferrer" className={quiet}>
+                LinkedIn <Arrow external className="size-4 text-ink-3" />
+              </a>
+            </li>
+            <li>
+              <a href={`https://${reach.github}`} target="_blank" rel="noopener noreferrer" className={quiet}>
+                GitHub <Arrow external className="size-4 text-ink-3" />
+              </a>
+            </li>
+            <li>
+              <Link href={reach.cv} className={quiet}>
+                {copy.contact.cv} <Arrow className="size-4 text-ink-3" />
+              </Link>
+            </li>
           </ul>
+
+          <h3 data-reveal className="text-body mt-10 font-medium text-ink-2">
+            {copy.end}
+          </h3>
+          <ul className="mt-2">
+            {stops.map(
+              (s) =>
+                s.caseStudy && (
+                  <li key={s.id} data-reveal>
+                    <Link href={s.caseStudy} className="group flex min-h-11 flex-wrap items-baseline gap-x-3 py-2">
+                      <span className="text-lead font-medium transition-colors duration-150 ease-out group-hover:text-accent">{s.name}</span>
+                      <span className="text-body text-ink-3">{s.kicker}</span>
+                    </Link>
+                  </li>
+                ),
+            )}
+          </ul>
+          <p data-reveal className="text-body mt-6 text-ink-3">
+            {copy.also}
+          </p>
         </div>
       </section>
     </div>

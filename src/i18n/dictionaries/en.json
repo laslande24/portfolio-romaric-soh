@@ -55,28 +55,6 @@
     "now": "Where it stands",
     "next": "Next project"
   },
-  "about": {
-    "label": "About",
-    "experience": "Experience",
-    "tools": "Tools",
-    "toolsLead": "Where each tool was used. Open a project to see it at work.",
-    "toolsCaption": "Tools, and the projects where each one was used",
-    "thisSite": "This site",
-    "earlier": "Earlier roles",
-    "earlierShort": "Earlier",
-    "used": "Used",
-    "also": "Also used",
-    "based": "Based in",
-    "languages": "Languages",
-    "education": "Education"
-  },
-  "contact": {
-    "label": "Contact",
-    "lead": "Email is the quickest way to reach me.",
-    "copy": "Copy",
-    "copied": "Copied",
-    "cv": "Open the CV"
-  },
   "cv": {
     "title": "CV",
     "back": "Back to the site",

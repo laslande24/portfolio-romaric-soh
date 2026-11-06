@@ -7,13 +7,15 @@ import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeom
 import { project, rubberband } from "@/lib/motion";
 import type { DeviceKind } from "@/content/tour";
 import { atStop, presence, smoothstep, tour } from "./state";
+import { BadgeBody, CertificateBody, DiplomaBody, NotebookBody } from "./Papers";
 
 /* ---------- Where each device lies, and how it comes out to meet the camera ---------- */
 
 type Place = { at: [number, number, number]; x: number; y: number };
 type Framing = { portrait: [number, number]; wide: [number, number] };
 type Spec = {
-  screen: { w: number; h: number; radius: number; island?: boolean };
+  /** Devices only: the panel the shader draws on. */
+  screen?: { w: number; h: number; radius: number; island?: boolean };
   /** Waiting on the mat. */
   rest: Place;
   /** At its stop, facing the camera. Rotations are applied yaw first (Euler YXZ). */
@@ -22,10 +24,15 @@ type Spec = {
   focus: [number, number, number];
   /** How far a mouse can tip it, in radians; 0 turns it about its upright axis only. */
   tip: number;
+  /** Turns over to show its back on this step of its stop. */
+  flip?: number;
   /** Footprint on the mat for the crop marks: size, and offset from `rest.at`. */
   footprint: { size: [number, number]; offset?: number };
-  /** The camera at this stop: from the screen towards the lens, area kept in frame, lens shift. */
-  view: { dir: [number, number, number]; fit: Framing; shift: Framing };
+  /**
+   * The camera at this stop: from the screen towards the lens, area kept in frame, lens shift,
+   * and how high it rises on the way here to clear what stands in between.
+   */
+  view: { dir: [number, number, number]; fit: Framing; shift: Framing; hop?: number };
 };
 
 // The laptop lid: nearly shut while it waits, opened to 107° at its stop
@@ -93,6 +100,63 @@ export const SPECS: Record<DeviceKind, Spec> = {
     view: {
       dir: [0.03, 0.12, 1],
       fit: { portrait: [2.3, 4.6], wide: [4.1, 2.5] },
+      shift: { portrait: [0, -0.19], wide: [0.2, 0.02] },
+    },
+  },
+
+  /*
+    The papers of the path, flat on the mat further down the same column.
+    Each one is picked up and tipped back to face the camera; the camera looks
+    down at them a little more steeply, so it clears the display's top edge.
+  */
+  badge: {
+    rest: { at: [0.35, 0.009, -6], x: -Math.PI / 2, y: 0.18 },
+    shown: { at: [0.35, 0.8, -5.8], x: -0.62, y: -0.06 },
+    focus: [0, 0, 0],
+    tip: 0.35,
+    flip: 2,
+    footprint: { size: [0.4, 0.62] },
+    view: {
+      dir: [0.04, 0.58, 0.81],
+      fit: { portrait: [0.62, 0.62 * 2.5], wide: [0.62, 0.62 * 1.85] },
+      shift: { portrait: [0, -0.17], wide: [0.2, 0.02] },
+      // Up and over the display's top edge
+      hop: 1.4,
+    },
+  },
+  notebook: {
+    rest: { at: [0.3, 0.02, -7.8], x: -Math.PI / 2, y: -0.1 },
+    shown: { at: [0.3, 0.75, -7.6], x: -0.62, y: 0 },
+    focus: [0, 0, 0],
+    tip: 0.35,
+    footprint: { size: [2.04, 1.44] },
+    view: {
+      dir: [0.03, 0.58, 0.81],
+      fit: { portrait: [2.2, 4.4], wide: [3.9, 2.4] },
+      shift: { portrait: [0, -0.19], wide: [0.2, 0.02] },
+    },
+  },
+  diploma: {
+    rest: { at: [0.4, 0.004, -9.7], x: -Math.PI / 2, y: 0.12 },
+    shown: { at: [0.4, 0.8, -9.5], x: -0.6, y: 0 },
+    focus: [0, 0, 0],
+    tip: 0.35,
+    footprint: { size: [1.98, 1.4] },
+    view: {
+      dir: [0.03, 0.56, 0.83],
+      fit: { portrait: [2.3, 4.6], wide: [3.5, 2.2] },
+      shift: { portrait: [0, -0.19], wide: [0.2, 0.02] },
+    },
+  },
+  certificate: {
+    rest: { at: [0.2, 0.004, -11.8], x: -Math.PI / 2, y: -0.14 },
+    shown: { at: [0.2, 0.95, -11.6], x: -0.55, y: 0 },
+    focus: [0, 0, 0],
+    tip: 0.35,
+    footprint: { size: [1.4, 1.98] },
+    view: {
+      dir: [0.03, 0.52, 0.85],
+      fit: { portrait: [1.8, 4.6], wide: [3.2, 2.7] },
       shift: { portrait: [0, -0.19], wide: [0.2, 0.02] },
     },
   },
@@ -172,6 +236,7 @@ const fragment = /* glsl */ `
 function useScreenMaterial(screen: Spec["screen"]) {
   return useMemo(
     () =>
+      screen &&
       new THREE.ShaderMaterial({
         vertexShader: vertex,
         fragmentShader: fragment,
@@ -206,7 +271,7 @@ function Feed({
   srcs: string[];
   into: RefObject<THREE.Texture[]>;
   material: THREE.ShaderMaterial;
-  screen: Spec["screen"];
+  screen: NonNullable<Spec["screen"]>;
   onLoaded: () => void;
 }) {
   const bitmaps = useLoader(THREE.ImageBitmapLoader, srcs, (l) => l.setOptions({ imageOrientation: "flipY" }));
@@ -342,7 +407,8 @@ function useTurn(index: number, tip: number) {
 // Aluminium for the desk devices: light on paper, so the dark phone leads
 const aluminium = { color: "#cfcbc4", metalness: 0.75, roughness: 0.38 } as const;
 
-type BodyProps = { material: THREE.ShaderMaterial; index: number };
+/** `material` is the screen; the papers have none. */
+type BodyProps = { material?: THREE.ShaderMaterial; index: number };
 
 function PhoneBody({ material }: BodyProps) {
   const geometry = useMemo(() => {
@@ -463,6 +529,10 @@ const BODIES: Record<DeviceKind, (p: BodyProps) => React.JSX.Element> = {
   laptop: LaptopBody,
   tablet: TabletBody,
   display: DisplayBody,
+  badge: BadgeBody,
+  notebook: NotebookBody,
+  diploma: DiplomaBody,
+  certificate: CertificateBody,
 };
 
 /* ---------- One stop's device ---------- */
@@ -490,6 +560,11 @@ export function Device({
   const rest = useMemo(() => new THREE.Vector3(...spec.rest.at), [spec]);
   const shown = useMemo(() => new THREE.Vector3(...spec.shown.at), [spec]);
 
+  // Nothing to fetch for a paper: pass the turn to the next device at once
+  useEffect(() => {
+    if (load && !material) onLoaded();
+  }, [load, material, onLoaded]);
+
   useFrame((_, delta) => {
     const g = root.current;
     const sp = spin.current;
@@ -505,19 +580,23 @@ export function Device({
     );
 
     // Screens: hold each one while its text is read, push to the next in between
-    const u = material.uniforms;
+    const at = tour.screen[index];
     const tex = feed.current;
-    if (tex.length) {
-      const at = tour.screen[index];
-      const i = Math.min(Math.floor(at), tex.length - 1);
-      u.tA.value = tex[i];
-      u.tB.value = tex[Math.min(i + 1, tex.length - 1)];
-      u.push.value = smoothstep(0.35, 0.65, at - i);
+    if (material) {
+      const u = material.uniforms;
+      if (tex.length) {
+        const i = Math.min(Math.floor(at), tex.length - 1);
+        u.tA.value = tex[i];
+        u.tB.value = tex[Math.min(i + 1, tex.length - 1)];
+        u.push.value = smoothstep(0.35, 0.65, at - i);
+      }
+      u.power.value = presence(index, 0.55, 1, 0.05, 0.45);
     }
-    u.power.value = presence(index, 0.55, 1, 0.05, 0.45);
 
+    // A paper with something on its back turns over as its last step arrives
+    const flip = spec.flip === undefined ? 0 : Math.PI * smoothstep(spec.flip - 0.75, spec.flip - 0.15, at);
     const moving = turn.step(delta);
-    sp.rotation.set(turn.s.pitch, turn.s.yaw, 0);
+    sp.rotation.set(turn.s.pitch, turn.s.yaw + flip, 0);
     if (moving) tour.invalidate();
   });
 
@@ -525,9 +604,9 @@ export function Device({
   return (
     <group ref={root} rotation-order="YXZ">
       <group ref={spin} {...turn.handlers}>
-        <Body material={material} index={index} />
+        <Body material={material ?? undefined} index={index} />
       </group>
-      {load && (
+      {load && material && spec.screen && (
         <Suspense fallback={null}>
           <Feed srcs={screens} into={feed} material={material} screen={spec.screen} onLoaded={onLoaded} />
         </Suspense>

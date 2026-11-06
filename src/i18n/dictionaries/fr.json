@@ -55,28 +55,6 @@
     "now": "Où en est le projet",
     "next": "Projet suivant"
   },
-  "about": {
-    "label": "À propos",
-    "experience": "Expérience",
-    "tools": "Outils",
-    "toolsLead": "Où chaque outil a servi. Ouvre un projet pour le voir à l'œuvre.",
-    "toolsCaption": "Les outils, et les projets où chacun a servi",
-    "thisSite": "Ce site",
-    "earlier": "Postes précédents",
-    "earlierShort": "Avant",
-    "used": "Utilisé",
-    "also": "Aussi utilisés",
-    "based": "Basé à",
-    "languages": "Langues",
-    "education": "Formation"
-  },
-  "contact": {
-    "label": "Contact",
-    "lead": "Le plus rapide pour me joindre, c'est l'e-mail.",
-    "copy": "Copier",
-    "copied": "Copié",
-    "cv": "Ouvrir le CV"
-  },
   "cv": {
     "title": "CV",
     "back": "Retour au site",
