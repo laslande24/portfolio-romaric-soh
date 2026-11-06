@@ -27,6 +27,9 @@ type Props = {
 
 type Mode = "pending" | "3d" | "lite";
 
+/** The scene uses lighter WebP copies of the screens as textures. */
+const webp = (src: string) => src.replace(/\.png$/, ".webp");
+
 /**
  * The lite tour: reduced motion, no WebGL, a low-memory phone or data saver.
  * Same text and order, the phone becomes a still image that changes screen.
@@ -62,7 +65,17 @@ export function Tour({ copy, laufwort, next, labels }: Props) {
   const [beat, setBeat] = useState(0);
   const beats = copy.laufwort.beats;
 
-  useEffect(() => setMode(pickMode()), []);
+  useEffect(() => {
+    const m = pickMode();
+    setMode(m);
+    // Fetch the phone's screens alongside the 3D code, not after it
+    if (m === "3d")
+      for (const b of beats) {
+        const img = new window.Image();
+        img.crossOrigin = "anonymous";
+        img.src = webp(b.screen);
+      }
+  }, [beats]);
 
   useGSAP(
     () => {
@@ -168,7 +181,7 @@ export function Tour({ copy, laufwort, next, labels }: Props) {
       <div aria-hidden className="mat fixed inset-0 z-0">
         {mode === "3d" && (
           <div className="absolute inset-0 transition-opacity duration-700 ease-out" style={{ opacity: ready ? 1 : 0 }}>
-            <Scene screens={beats.map((b) => b.screen.replace(/\.png$/, ".webp"))} onReady={() => setReady(true)} />
+            <Scene screens={beats.map((b) => webp(b.screen))} onReady={() => setReady(true)} />
           </div>
         )}
       </div>
