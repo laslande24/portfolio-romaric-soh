@@ -33,8 +33,10 @@ export async function generateMetadata({ params }: Omit<Props, "children">): Pro
       title: dict.meta.title,
       description: dict.meta.description,
       locale: lang === "fr" ? "fr_FR" : "en_US",
+      // A plain file in public/: Next's opengraph-image convention breaks under a [lang] root layout.
+      images: [{ url: "/og.png", width: 1200, height: 630, alt: dict.meta.title }],
     },
-    twitter: { card: "summary_large_image" },
+    twitter: { card: "summary_large_image", images: ["/og.png"] },
     alternates: {
       languages: Object.fromEntries(locales.map((l) => [l, `/${l}`])),
     },
