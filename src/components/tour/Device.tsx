@@ -7,6 +7,7 @@ import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeom
 import { project, rubberband } from "@/lib/motion";
 import type { DeviceKind } from "@/content/tour";
 import { atStop, presence, smoothstep, tour } from "./state";
+import { JetBody } from "./Jet";
 import { BadgeBody, CertificateBody, DiplomaBody, NotebookBody } from "./Papers";
 
 /* ---------- Where each device lies, and how it comes out to meet the camera ---------- */
@@ -105,13 +106,35 @@ export const SPECS: Record<DeviceKind, Spec> = {
   },
 
   /*
+    Aéro: a drawing of the jet, flat on the mat well behind the display (the
+    camera backs off to frame it, and must have the display under its lens). Picked up
+    like the papers; the model comes up out of it towards the camera, so the
+    camera looks at the space between the two.
+  */
+  jet: {
+    rest: { at: [0.3, 0.006, -7], x: -Math.PI / 2, y: 0.1 },
+    // Less upright than the papers: the camera looks down on it steeply, to keep the display out of frame
+    shown: { at: [0.3, 0.8, -6.8], x: -1.1, y: -0.04 },
+    focus: [0, -0.05, 0.35],
+    tip: 0.35,
+    footprint: { size: [2.5, 1.15] },
+    view: {
+      dir: [0.03, 0.9, 0.45],
+      fit: { portrait: [2.9, 5.8], wide: [4.5, 2.8] },
+      shift: { portrait: [0, -0.19], wide: [0.2, 0.02] },
+      // Up and over the display's top edge
+      hop: 1.4,
+    },
+  },
+
+  /*
     The papers of the path, flat on the mat further down the same column.
     Each one is picked up and tipped back to face the camera; the camera looks
     down at them a little more steeply, so it clears the display's top edge.
   */
   badge: {
-    rest: { at: [0.35, 0.009, -6], x: -Math.PI / 2, y: 0.18 },
-    shown: { at: [0.35, 0.8, -5.8], x: -0.62, y: -0.06 },
+    rest: { at: [0.35, 0.009, -9.3], x: -Math.PI / 2, y: 0.18 },
+    shown: { at: [0.35, 0.8, -9.1], x: -0.62, y: -0.06 },
     focus: [0, 0, 0],
     tip: 0.35,
     flip: 2,
@@ -120,13 +143,11 @@ export const SPECS: Record<DeviceKind, Spec> = {
       dir: [0.04, 0.58, 0.81],
       fit: { portrait: [0.62, 0.62 * 2.5], wide: [0.62, 0.62 * 1.85] },
       shift: { portrait: [0, -0.17], wide: [0.2, 0.02] },
-      // Up and over the display's top edge
-      hop: 1.4,
     },
   },
   notebook: {
-    rest: { at: [0.3, 0.02, -7.8], x: -Math.PI / 2, y: -0.1 },
-    shown: { at: [0.3, 0.75, -7.6], x: -0.62, y: 0 },
+    rest: { at: [0.3, 0.02, -11.1], x: -Math.PI / 2, y: -0.1 },
+    shown: { at: [0.3, 0.75, -10.9], x: -0.62, y: 0 },
     focus: [0, 0, 0],
     tip: 0.35,
     footprint: { size: [2.04, 1.44] },
@@ -137,8 +158,8 @@ export const SPECS: Record<DeviceKind, Spec> = {
     },
   },
   diploma: {
-    rest: { at: [0.4, 0.004, -9.7], x: -Math.PI / 2, y: 0.12 },
-    shown: { at: [0.4, 0.8, -9.5], x: -0.6, y: 0 },
+    rest: { at: [0.4, 0.004, -13], x: -Math.PI / 2, y: 0.12 },
+    shown: { at: [0.4, 0.8, -12.8], x: -0.6, y: 0 },
     focus: [0, 0, 0],
     tip: 0.35,
     footprint: { size: [1.98, 1.4] },
@@ -149,8 +170,8 @@ export const SPECS: Record<DeviceKind, Spec> = {
     },
   },
   certificate: {
-    rest: { at: [0.2, 0.004, -11.8], x: -Math.PI / 2, y: -0.14 },
-    shown: { at: [0.2, 0.95, -11.6], x: -0.55, y: 0 },
+    rest: { at: [0.2, 0.004, -15.1], x: -Math.PI / 2, y: -0.14 },
+    shown: { at: [0.2, 0.95, -14.9], x: -0.55, y: 0 },
     focus: [0, 0, 0],
     tip: 0.35,
     footprint: { size: [1.4, 1.98] },
@@ -530,6 +551,7 @@ const BODIES: Record<DeviceKind, (p: BodyProps) => React.JSX.Element> = {
   laptop: LaptopBody,
   tablet: TabletBody,
   display: DisplayBody,
+  jet: JetBody,
   badge: BadgeBody,
   notebook: NotebookBody,
   diploma: DiplomaBody,

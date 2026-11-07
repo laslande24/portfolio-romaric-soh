@@ -1,7 +1,7 @@
 import type { Locale } from "@/i18n/config";
 
 export type Role = "frontend" | "fullstack";
-export type ProjectId = "redekunst" | "laufwort" | "sevensets" | "portfolioos";
+export type ProjectId = "redekunst" | "laufwort" | "sevensets" | "portfolioos" | "aero";
 type Text = Record<Locale, string>;
 
 export type Project = {
@@ -85,6 +85,22 @@ export const projects: Project[] = [
     },
     stack: ["React 19", "Vite", "GSAP", "Supabase", "Tailwind"],
     links: { live: "https://romaricsoh-os.vercel.app", code: "https://github.com/laslande24/portfolio-os" },
+  },
+  {
+    id: "aero",
+    name: "Aéro",
+    object: "window",
+    label: "aero-jet-configurator",
+    screen: { src: "/projects/aero/exterior.png", width: 1280, height: 800 },
+    year: "2026",
+    kind: { en: "Booking app", fr: "App de réservation" },
+    status: { en: "Front-end demo complete, not deployed", fr: "Démo front-end terminée, pas mise en ligne" },
+    summary: {
+      en: "Private jet booking in 3D: compare two aircraft, walk through the cabin, pick a seat and book it. The page opens flat in 2D and loads the 3D on demand.",
+      fr: "Réservation de jet privé en 3D : comparer deux appareils, visiter la cabine, choisir un siège et le réserver. La page s'ouvre à plat en 2D et charge la 3D à la demande.",
+    },
+    stack: ["React 19", "React Three Fiber", "GSAP", "Zustand", "Playwright"],
+    links: { code: "https://github.com/laslande24/aero-jet-configurator" },
   },
 ];
 

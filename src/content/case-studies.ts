@@ -448,6 +448,146 @@ export const caseStudies: Record<ProjectId, CaseStudy> = {
       },
     },
   },
+
+  aero: {
+    slug: "aero",
+    heroAlt: {
+      en: "Aéro's exterior view: the Bombardier Global 6000 in flat side profile, door open and cabin cut away, above the cabin plan",
+      fr: "Vue extérieure d'Aéro : le Bombardier Global 6000 de profil, à plat, porte ouverte et cabine découpée, au-dessus du plan de cabine",
+    },
+    media: [
+      {
+        src: "/projects/aero/exterior-3d.png",
+        width: 1280,
+        height: 800,
+        device: "window",
+        label: "aero-jet-configurator",
+        alt: {
+          en: "The same jet as a 3D model you can orbit, stairs down and cabin cut away",
+          fr: "Le même jet en modèle 3D qu'on fait tourner, escalier déployé et cabine découpée",
+        },
+        caption: { en: "The same jet, in 3D", fr: "Le même jet, en 3D" },
+      },
+      {
+        src: "/projects/aero/cabin.png",
+        width: 1280,
+        height: 800,
+        device: "window",
+        label: "aero-jet-configurator",
+        alt: {
+          en: "Inside the cabin in 3D, the cabin plan below it with seat ML3 selected",
+          fr: "L'intérieur de la cabine en 3D, le plan de cabine en dessous avec le siège ML3 sélectionné",
+        },
+        caption: { en: "The cabin, and seat ML3 picked on the plan", fr: "La cabine, et le siège ML3 choisi sur le plan" },
+      },
+      {
+        src: "/projects/aero/booking.png",
+        width: 1280,
+        height: 800,
+        device: "window",
+        label: "aero-jet-configurator",
+        alt: {
+          en: "Booking summary: route, passenger details and the price for seat ML3",
+          fr: "Récapitulatif de réservation : trajet, coordonnées du passager et prix du siège ML3",
+        },
+        caption: { en: "The booking summary", fr: "Le récapitulatif de réservation" },
+      },
+      {
+        src: "/projects/aero/confirmed.png",
+        width: 1280,
+        height: 800,
+        device: "window",
+        label: "aero-jet-configurator",
+        alt: {
+          en: "Booking confirmed: the route, date, aircraft, seat and total paid, with the booking reference",
+          fr: "Réservation confirmée : trajet, date, appareil, siège et total réglé, avec la référence de réservation",
+        },
+        caption: { en: "The confirmation", fr: "La confirmation" },
+      },
+    ],
+    copy: {
+      en: {
+        role: "Front-end and 3D development from a Figma mockup",
+        brief: [
+          "Aéro is a booking site for private jets: compare the aircraft, walk through the cabin in 3D, pick a seat on the cabin plan, book the flight. It is a complete front-end demo, with fictional prices and no real payment.",
+          "A Figma mockup set the direction: a lavender-grey backdrop, a warm panel, black pills for the active step, a steel-blue aircraft card. The build had to stay that calm while the 3D, the cabin and the booking went on top.",
+        ],
+        angles: {
+          frontend: {
+            title: "A 3D jet built in code",
+            points: [
+              "The jet is procedural: a fuselage turned from a profile, swept wings, a T-tail, rear engines, deployed stairs, a gold cheatline and the registration on the fin. No model file is downloaded.",
+              "The cabin cut-away is a real hole in the hull. The fuselage is built in three parts, the middle one missing the angle of the opening, so the seats inside show through.",
+              "The page opens on a flat 2D view, about 100 kB of JavaScript. three.js arrives in its own chunk only when the visitor asks for the 3D or enters the cabin.",
+              "A 3D visit in four zones, each with its own furniture, materials and light. GSAP moves the camera between them, and with reduced motion each view appears without the flight.",
+            ],
+          },
+          fullstack: {
+            title: "One state for the scene, the plan and the booking",
+            points: [
+              "Zustand holds the aircraft, the seat and the booking step. The 3D scene and the 2D cabin plan read and write the same store, so a seat picked in one lights up in the other.",
+              "Each aircraft keeps its own seat when you switch, and the booking draft survives a trip back to the cabin.",
+              "Client-side validation that says what is wrong and how to fix it, and a price built from the charter rate, the seat and 12% taxes.",
+              "A Playwright test walks the whole journey with twenty checks. Continuous integration replays lint, types, build and that journey on every push.",
+            ],
+          },
+        },
+        story: {
+          title: "The confirmation nobody could see",
+          body: [
+            "The booking ends on a confirmation that animates in with GSAP. The end-to-end test kept failing there: the screen was mounted, and nothing on it was visible.",
+            "In development, React's Strict Mode mounts each component twice. The first mount's gsap.from had already put the elements at their starting point, invisible, and the second mount took that as the place to end. It animated from invisible to invisible.",
+            "Each animation now runs inside a gsap.context that the cleanup reverts, so the second mount starts from the real page.",
+          ],
+        },
+        now: [
+          "The front-end is complete, tested and published under the MIT licence.",
+          "Next come a public deployment and an image for link previews.",
+        ],
+        credit: "Visual direction: a Figma mockup of a jet configurator.",
+      },
+      fr: {
+        role: "Développement front-end et 3D d'après une maquette Figma",
+        brief: [
+          "Aéro est un site de réservation de jets privés : comparer les appareils, visiter la cabine en 3D, choisir un siège sur le plan de cabine, réserver le vol. C'est une démo front-end complète, avec des prix fictifs et sans paiement réel.",
+          "Une maquette Figma donnait la direction : un fond gris lavande, un panneau chaud, des pastilles noires pour l'étape active, une carte avion bleu acier. Le site devait rester aussi calme une fois la 3D, la cabine et la réservation posées dessus.",
+        ],
+        angles: {
+          frontend: {
+            title: "Un jet en 3D construit en code",
+            points: [
+              "Le jet est procédural : un fuselage tourné à partir d'un profil, des ailes en flèche, un empennage en T, des moteurs arrière, l'escalier déployé, un liseré doré et l'immatriculation sur la dérive. Aucun fichier de modèle n'est téléchargé.",
+              "La découpe de la cabine est un vrai trou dans la coque. Le fuselage est construit en trois parties, celle du milieu privée de l'angle de l'ouverture, pour qu'on voie les sièges à l'intérieur.",
+              "La page s'ouvre sur une vue 2D à plat, environ 100 Ko de JavaScript. three.js arrive dans son propre morceau, seulement quand le visiteur demande la 3D ou entre dans la cabine.",
+              "Une visite 3D en quatre zones, chacune avec son mobilier, ses matières et sa lumière. GSAP déplace la caméra de l'une à l'autre ; avec « réduire les animations », chaque vue apparaît sans le trajet.",
+            ],
+          },
+          fullstack: {
+            title: "Un seul état pour la scène, le plan et la réservation",
+            points: [
+              "Zustand garde l'appareil, le siège et l'étape de réservation. La scène 3D et le plan de cabine 2D lisent et écrivent le même store : un siège choisi dans l'un s'allume dans l'autre.",
+              "Chaque appareil garde son siège quand on change d'avion, et le brouillon de réservation survit à un retour dans la cabine.",
+              "Une validation côté client qui dit ce qui ne va pas et comment le corriger, et un prix calculé à partir de l'affrètement, du siège et de 12 % de taxes.",
+              "Un test Playwright parcourt tout le trajet avec vingt vérifications. L'intégration continue rejoue lint, types, build et ce parcours à chaque push.",
+            ],
+          },
+        },
+        story: {
+          title: "La confirmation que personne ne voyait",
+          body: [
+            "La réservation se termine sur une confirmation animée avec GSAP. Le test de bout en bout échouait toujours à cet endroit : l'écran était monté, et rien n'y était visible.",
+            "En développement, le Strict Mode de React monte chaque composant deux fois. Le gsap.from du premier montage avait déjà placé les éléments à leur point de départ, invisibles, et le second montage l'a pris pour le point d'arrivée. L'animation allait d'invisible à invisible.",
+            "Chaque animation tourne maintenant dans un gsap.context que le nettoyage annule, pour que le second montage parte de la vraie page.",
+          ],
+        },
+        now: [
+          "Le front-end est terminé, testé et publié sous licence MIT.",
+          "Viennent ensuite une mise en ligne publique et une image pour les aperçus de liens.",
+        ],
+        credit: "Direction visuelle : une maquette Figma de configurateur de jet.",
+      },
+    },
+  },
 };
 
 export const caseStudyBySlug = Object.fromEntries(

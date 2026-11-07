@@ -247,7 +247,7 @@ body:has(.menu-panel:popover-open) .menu-line:last-child {
 /* ---------- Print: the CV page prints as a plain A4 sheet ---------- */
 @page {
   size: A4;
-  margin: 14mm 16mm;
+  margin: 12mm 16mm;
 }
 @media print {
   :root {

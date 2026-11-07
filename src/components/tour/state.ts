@@ -3,8 +3,8 @@
  * loop. A plain mutable object on purpose: React state would re-render on every
  * scroll tick.
  */
-/** Four projects, then the four papers of the path: the stops in `content/tour.ts`. */
-export const STOPS = 8;
+/** Five projects, then the four papers of the path: the stops in `content/tour.ts`. */
+export const STOPS = 9;
 
 export const tour = {
   /**

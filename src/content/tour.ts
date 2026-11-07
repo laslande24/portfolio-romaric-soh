@@ -3,10 +3,11 @@ import type { ProjectId } from "@/content/projects";
 import { alsoUsed, education, experience, type Job } from "@/content/profile";
 
 /**
- * Everything on the bench: a device for each project, then the papers of the
- * path at the far end (a work badge, a notebook, a degree, a certificate).
+ * Everything on the bench: a device for each project (Aéro's is a drawing of
+ * its jet), then the papers of the path at the far end (a work badge, a
+ * notebook, a degree, a certificate).
  */
-export type DeviceKind = "phone" | "laptop" | "tablet" | "display" | "badge" | "notebook" | "diploma" | "certificate";
+export type DeviceKind = "phone" | "laptop" | "tablet" | "display" | "jet" | "badge" | "notebook" | "diploma" | "certificate";
 type PaperKind = Extract<DeviceKind, "badge" | "notebook" | "diploma" | "certificate">;
 
 /**
@@ -97,6 +98,12 @@ const s = {
     desktop: "/projects/portfolio-os/desktop.png",
     projects: "/projects/portfolio-os/projects.png",
     about: "/projects/portfolio-os/about.png",
+  },
+  aero: {
+    exterior: "/projects/aero/exterior.png",
+    exterior3d: "/projects/aero/exterior-3d.png",
+    cabin: "/projects/aero/cabin.png",
+    booking: "/projects/aero/booking.png",
   },
 };
 
@@ -201,6 +208,36 @@ export const tour: Record<Locale, TourCopy> = {
             alt: "About window with the profile, the links and the skills grouped by area",
             title: "Where the metaphor stops",
             body: "A desktop needs a pointer, so phones got their own single-column layout. This site keeps what worked, objects you handle directly, and builds it for touch first.",
+          },
+        ],
+      },
+      {
+        id: "aero",
+        device: "jet",
+        beats: [
+          {
+            screen: s.aero.exterior,
+            alt: "Aéro's exterior view: the Bombardier Global 6000 in flat side profile, door open and cabin cut away, above the cabin plan",
+            title: "Aéro",
+            body: "Book a seat on a private jet. Compare two aircraft, walk through the cabin in 3D, pick your seat on the cabin plan and book the flight. A front-end demo, with no real payment.",
+          },
+          {
+            screen: s.aero.exterior3d,
+            alt: "The same jet as a 3D model you can orbit, stairs down and cabin cut away",
+            title: "Flat first, 3D on demand",
+            body: "The page opens on a flat drawing of the jet, about 100 kB of JavaScript. three.js only loads when you switch to 3D, and the model is built in code: there is no file to download.",
+          },
+          {
+            screen: s.aero.cabin,
+            alt: "Inside the cabin in 3D, the cabin plan below it with seat ML3 selected",
+            title: "One seat, two views",
+            body: "Pick a seat in the 3D cabin or on the plan below it, and the other one follows. Each aircraft keeps its own choice when you switch between them.",
+          },
+          {
+            screen: s.aero.booking,
+            alt: "Booking summary: route, passenger details and the price for seat ML3",
+            title: "From seat to booking",
+            body: "Route, passenger, price, then a confirmation with its reference. A Playwright test replays the whole journey on every push, twenty checks.",
           },
         ],
       },
@@ -323,6 +360,36 @@ export const tour: Record<Locale, TourCopy> = {
             alt: "Fenêtre À propos avec le profil, les liens et les compétences par domaine",
             title: "Là où la métaphore s'arrête",
             body: "Un bureau demande un pointeur : les téléphones ont donc eu leur propre mise en page en une colonne. Ce site garde ce qui marchait, des objets qu'on manipule, et le construit d'abord pour le tactile.",
+          },
+        ],
+      },
+      {
+        id: "aero",
+        device: "jet",
+        beats: [
+          {
+            screen: s.aero.exterior,
+            alt: "Vue extérieure d'Aéro : le Bombardier Global 6000 de profil, à plat, porte ouverte et cabine découpée, au-dessus du plan de cabine",
+            title: "Aéro",
+            body: "Réserver une place dans un jet privé. Comparer deux appareils, visiter la cabine en 3D, choisir son siège sur le plan de cabine et réserver le vol. Une démo front-end, sans paiement réel.",
+          },
+          {
+            screen: s.aero.exterior3d,
+            alt: "Le même jet en modèle 3D qu'on fait tourner, escalier déployé et cabine découpée",
+            title: "D'abord à plat, la 3D à la demande",
+            body: "La page s'ouvre sur un dessin à plat du jet, environ 100 Ko de JavaScript. three.js ne se charge qu'au passage en 3D, et le modèle est construit en code : aucun fichier à télécharger.",
+          },
+          {
+            screen: s.aero.cabin,
+            alt: "L'intérieur de la cabine en 3D, le plan de cabine en dessous avec le siège ML3 sélectionné",
+            title: "Un siège, deux vues",
+            body: "Choisis un siège dans la cabine 3D ou sur le plan en dessous, l'autre suit. Chaque appareil garde son choix quand tu passes de l'un à l'autre.",
+          },
+          {
+            screen: s.aero.booking,
+            alt: "Récapitulatif de réservation : trajet, coordonnées du passager et prix du siège ML3",
+            title: "Du siège à la réservation",
+            body: "Trajet, passager, prix, puis une confirmation avec sa référence. Un test Playwright rejoue tout le parcours à chaque push, vingt vérifications.",
           },
         ],
       },

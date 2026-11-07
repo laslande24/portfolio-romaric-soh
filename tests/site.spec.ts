@@ -2,14 +2,15 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 const chapters = {
-  en: ["Laufwort", "Redekunst-Challenge", "7SETS", "PortfolioOS", "AFREETECH", "QTA TECH", "Bachelor of Engineering", "Goethe-Zertifikat B2", "Write to me"],
-  fr: ["Laufwort", "Redekunst-Challenge", "7SETS", "PortfolioOS", "AFREETECH", "QTA TECH", "Bachelor of Engineering", "Goethe-Zertifikat B2", "Écris-moi"],
+  en: ["Laufwort", "Redekunst-Challenge", "7SETS", "PortfolioOS", "Aéro", "AFREETECH", "QTA TECH", "Bachelor of Engineering", "Goethe-Zertifikat B2", "Write to me"],
+  fr: ["Laufwort", "Redekunst-Challenge", "7SETS", "PortfolioOS", "Aéro", "AFREETECH", "QTA TECH", "Bachelor of Engineering", "Goethe-Zertifikat B2", "Écris-moi"],
 };
 const studies = [
   ["redekunst-challenge", "Redekunst-Challenge"],
   ["laufwort", "Laufwort"],
   ["7sets", "7SETS"],
   ["portfolio-os", "PortfolioOS"],
+  ["aero", "Aéro"],
 ] as const;
 
 /** Fails the test on any uncaught error in the page. */

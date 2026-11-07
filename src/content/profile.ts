@@ -116,20 +116,21 @@ export const experience: Job[] = [
   },
 ];
 
-/** Columns of the tools table: the four projects, this site, and the jobs above. */
+/** Columns of the tools table: the projects, this site, and the jobs above. */
 export type ToolColumn = ProjectId | "site" | "earlier";
 
 export const tools: { name: Text; used: ToolColumn[] }[] = [
   { name: { en: "Interface design", fr: "Design d'interface" }, used: ["redekunst", "laufwort", "portfolioos", "site", "earlier"] },
-  { name: { en: "React", fr: "React" }, used: ["redekunst", "laufwort", "sevensets", "portfolioos", "site", "earlier"] },
+  { name: { en: "React", fr: "React" }, used: ["redekunst", "laufwort", "sevensets", "portfolioos", "site", "earlier", "aero"] },
   { name: { en: "Next.js", fr: "Next.js" }, used: ["redekunst", "sevensets", "site"] },
-  { name: { en: "TypeScript", fr: "TypeScript" }, used: ["redekunst", "laufwort", "sevensets", "portfolioos", "site"] },
-  { name: { en: "Tailwind CSS", fr: "Tailwind CSS" }, used: ["redekunst", "sevensets", "portfolioos", "site"] },
-  { name: { en: "Animation: GSAP, Motion, Reanimated", fr: "Animation : GSAP, Motion, Reanimated" }, used: ["redekunst", "laufwort", "sevensets", "portfolioos", "site"] },
+  { name: { en: "TypeScript", fr: "TypeScript" }, used: ["redekunst", "laufwort", "sevensets", "portfolioos", "site", "aero"] },
+  { name: { en: "Tailwind CSS", fr: "Tailwind CSS" }, used: ["redekunst", "sevensets", "portfolioos", "site", "aero"] },
+  { name: { en: "Animation: GSAP, Motion, Reanimated", fr: "Animation : GSAP, Motion, Reanimated" }, used: ["redekunst", "laufwort", "sevensets", "portfolioos", "site", "aero"] },
+  { name: { en: "3D: three.js, React Three Fiber", fr: "3D : three.js, React Three Fiber" }, used: ["aero", "site"] },
   { name: { en: "Accessibility, WCAG 2.2", fr: "Accessibilité, WCAG 2.2" }, used: ["sevensets", "site"] },
   { name: { en: "Expo and React Native", fr: "Expo et React Native" }, used: ["laufwort", "earlier"] },
   { name: { en: "Supabase and PostgreSQL", fr: "Supabase et PostgreSQL" }, used: ["redekunst", "portfolioos"] },
-  { name: { en: "Tests: Vitest, Playwright", fr: "Tests : Vitest, Playwright" }, used: ["redekunst", "sevensets"] },
+  { name: { en: "Tests: Vitest, Playwright", fr: "Tests : Vitest, Playwright" }, used: ["redekunst", "sevensets", "aero"] },
   { name: { en: "Symfony and WordPress", fr: "Symfony et WordPress" }, used: ["earlier"] },
   { name: { en: "Specifications and UML", fr: "Spécifications et UML" }, used: ["earlier"] },
 ];

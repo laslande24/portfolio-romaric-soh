@@ -69,9 +69,9 @@ function poses(portrait: boolean, kinds: DeviceKind[]): Pose[] {
     }),
     // Pull back from the far end and look up the whole bench, devices to papers
     {
-      target: new THREE.Vector3(0.3, 0, -5),
+      target: new THREE.Vector3(0.3, 0, -6.6),
       dir: new THREE.Vector3(...(portrait ? [-0.1, 0.62, 0.78] : [0.36, 0.74, 0.57])).normalize(),
-      fit: portrait ? [5, 11] : [15, 9.5],
+      fit: portrait ? [5.4, 14] : [19, 12],
       shift: new THREE.Vector2(...(portrait ? [0, 0.3] : [0.24, 0.04])),
       hop: 0,
     },

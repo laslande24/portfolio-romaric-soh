@@ -34,9 +34,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="grid gap-2 border-t border-line pt-4 sm:grid-cols-[8rem_1fr] sm:gap-6 print:grid-cols-[8rem_1fr] print:gap-6">
+    <section className="grid gap-2 border-t border-line pt-4 print:pt-3 sm:grid-cols-[8rem_1fr] sm:gap-6 print:grid-cols-[8rem_1fr] print:gap-6">
       <h2 className="text-body font-medium text-ink-2">{title}</h2>
-      <div className="space-y-4">{children}</div>
+      <div className="space-y-4 print:space-y-3">{children}</div>
     </section>
   );
 }
@@ -75,7 +75,7 @@ export default async function CvPage({ params }: { params: Params }) {
         </div>
 
         {/* The sheet: a real page, so the crop marks are where a printer would put them */}
-        <article className="relative space-y-6 bg-card p-6 shadow-object sm:p-12 print:space-y-4 print:p-0 print:shadow-none">
+        <article className="relative space-y-6 bg-card p-6 shadow-object sm:p-12 print:space-y-3 print:p-0 print:shadow-none">
           <span className="print:hidden">
             <CropMarks />
           </span>

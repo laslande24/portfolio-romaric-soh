@@ -14,17 +14,17 @@ import { tour } from "./state";
   Built like the devices: printed face towards +z, sizes in scene units.
 */
 
-const INK = "#1d1a16";
-const INK_2 = "#4f473d";
+export const INK = "#1d1a16";
+export const INK_2 = "#4f473d";
 /** Cream stock, a step darker than the mat, so a sheet's edge shows against it. */
-const PAPER = "#eee5d2";
+export const PAPER = "#eee5d2";
 /** The badge is white plastic. */
 const CARD = "#f7f4ee";
 const LATERITE = "#b4441f";
 
 type Fonts = { display: string; sans: string };
 /** Draws in thousandths of a scene unit: a 0.4-unit badge is 400 wide. */
-type Draw = (g: CanvasRenderingContext2D, f: Fonts) => void;
+export type Draw = (g: CanvasRenderingContext2D, f: Fonts) => void;
 
 /*
   Prints wait their turn: drawn and uploaded together they cost one long frame
@@ -66,7 +66,7 @@ function blank(colour: string) {
 }
 
 /** A print on paper, drawn once `load` comes (after the devices' screens) in a quiet moment. */
-function usePrint(w: number, h: number, draw: Draw, load: boolean, background = PAPER) {
+export function usePrint(w: number, h: number, draw: Draw, load: boolean, background = PAPER) {
   const gl = useThree((s) => s.gl);
   const [ready, setReady] = useState(false);
   const texture = useMemo(() => {
@@ -128,7 +128,7 @@ const type = (g: CanvasRenderingContext2D, weight: number, size: number, family:
 };
 
 /** A sheet that does not lie quite flat: its sides lift by `curl`. */
-function sheet(w: number, h: number, curl: number) {
+export function sheet(w: number, h: number, curl: number) {
   const g = new THREE.PlaneGeometry(w, h, 24, 1);
   const p = g.attributes.position;
   for (let i = 0; i < p.count; i++) p.setZ(i, curl * ((2 * p.getX(i)) / w) ** 2);
