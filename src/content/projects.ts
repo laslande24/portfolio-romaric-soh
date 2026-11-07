@@ -94,13 +94,13 @@ export const projects: Project[] = [
     screen: { src: "/projects/aero/exterior.png", width: 1280, height: 800 },
     year: "2026",
     kind: { en: "Booking app", fr: "App de réservation" },
-    status: { en: "Front-end demo complete, not deployed", fr: "Démo front-end terminée, pas mise en ligne" },
+    status: { en: "Front-end demo, live", fr: "Démo front-end, en ligne" },
     summary: {
       en: "Private jet booking in 3D: compare two aircraft, walk through the cabin, pick a seat and book it. The page opens flat in 2D and loads the 3D on demand.",
       fr: "Réservation de jet privé en 3D : comparer deux appareils, visiter la cabine, choisir un siège et le réserver. La page s'ouvre à plat en 2D et charge la 3D à la demande.",
     },
     stack: ["React 19", "React Three Fiber", "GSAP", "Zustand", "Playwright"],
-    links: { code: "https://github.com/laslande24/aero-jet-configurator" },
+    links: { live: "https://romaricsoh-aero.vercel.app", code: "https://github.com/laslande24/aero-jet-configurator" },
   },
 ];
 
